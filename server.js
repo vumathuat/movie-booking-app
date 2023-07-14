@@ -48,15 +48,17 @@ app.get('/account', getToken.tokenExist, getToken.validateToken, async (req, res
 });
 
 //update user information
-app.post('/update_user', getToken.tokenExist, getToken.validateToken, getToken.validateFields, async (req, res, next) => { //only send updating field
+app.post('/update_user', getToken.tokenExist, getToken.validateToken, getToken.validateFields, async (req, res, next) => { //only send updating field if password then also need to include old_password (send password first)
     const user_id = req.user.user_id;
     const update_fields = Object.keys(req.body);
-    var str_update_fields = '';
-    let update_values = [];
-    var pass_check = true;
+    const allow_fields = ['username', 'email', 'phone_no', 'timer', 'status', 'password'];
+    var check;
 
-    const sql_search = 'SELECT password FROM Users where user_id = ?';
-    const password_search_query = mysql.format(sql_search, [user_id]);
+    if (update_fields.length < 1) {
+        res.status(400).send('Empty request!');
+        return next();
+    }
+
     for (let i = 0; i < update_fields.length; i++) { //check for null value
         if (!req.body[update_fields[i]]) {
             res.status(400).send('Empty fields!');
@@ -64,75 +66,39 @@ app.post('/update_user', getToken.tokenExist, getToken.validateToken, getToken.v
         }
     }
 
-    if (update_fields.length < 1) {
-        res.status(400).send('Empty request!');
-        return next();
-    }
+    if (update_fields.includes('password') && update_fields.includes('old_password')) { //check for password
+        const sql_search = 'SELECT password FROM Users where user_id = ?';
+        const password_search_query = mysql.format(sql_search, [user_id]);
 
-    if (update_fields.includes('status')) {
-        res.status(400).send('Can not change activision status.');
-        return next();
-    }
+        await db_conn.pool.getConnection(async (err, conn) => {
+            await conn.query(password_search_query, async (err, result) => {
+                if (err) throw (err)
 
-    await db_conn.pool.getConnection(async (err, conn) => {
-        if (err) throw (err)
-
-        checkLoop: for (let i = 0; i < update_fields.length; i++) {
-            if (update_fields[i] == 'old_password') {
-                i++;
-            }
-
-            if (update_fields[i] == 'password') {
-                if (!req.body.old_password) {
-                    res.status(401).send('Missing old password!');
-                    pass_check = false;
-                    break checkLoop;
-
-                }
-
-                await conn.query(password_search_query, async (err, result) => {
-                    if (err) throw (err)
-
-                    if (await bcrypt.compare(req.body.old_password, result[0].password) == false) {
-                        conn.release();
-                        res.status(401).send('Wrong old password!');
-                        pass_check = false;
+                if (await bcrypt.compare(req.body.old_password, result[0].password)) {
+                    if (!allow_fields.includes(update_fields[0])) {
+                        res.status(400).send('Unknown field!');
+                        return next();
                     }
-                })
 
-                if (pass_check == false) {
-                    break checkLoop;
+                    const sql_update = 'UPDATE Users SET ' + update_fields[0] + ' =? where user_id = ?';
+                    const updateUser_query = mysql.format(sql_update, [await bcrypt.hash(req.body[update_fields[0]], 10), user_id]);
+
+                    await conn.query(updateUser_query, async (err) => {
+                        conn.release();
+
+                        if (err) throw (err)
+
+                        res.status(200).send('User information updated!');
+                    })
+                } else {
+                    res.status(401).send('Wrong old passowrd!');
                 }
-
-                update_values.push(await bcrypt.hash(req.body[update_fields[i]], 10));
-            } else {
-                update_values.push(req.body[update_fields[i]]);
-            }
-
-            if (!str_update_fields) {
-                str_update_fields = update_fields[i] + ' = ?';
-            } else {
-                str_update_fields += ', ' + update_fields[i] + ' = ?';
-            }
-        } //create string contain the fields with their updating values
-
-        if (pass_check == false) {
-            return next();
-        }
-
-        update_values.push(user_id);
-        const sql_update = 'UPDATE Users SET ' + str_update_fields + ' where user_id = ?';
-        const updateUser_query = mysql.format(sql_update, update_values);
-        await conn.query(updateUser_query, (err) => {
-            conn.release();
-            if (err) throw (err)
-
-            res.status(200).send('User information updated!')
+            })
         })
-    })
+    }
 });
 
-
+// admin function deactivate/activate user
 app.post('/changeUserStatus', getToken.tokenExist, getToken.validateToken, getToken.validateAdmin, async (req, res, next) => {
     const user_id = req.body.user_id;
     const status = req.body.status;
@@ -159,6 +125,7 @@ app.post('/changeUserStatus', getToken.tokenExist, getToken.validateToken, getTo
     })
 });
 
+//admin function see all users
 app.get('/manageUsers', getToken.tokenExist, getToken.validateToken, getToken.validateAdmin, async (req, res) => {
     const user_id = process.env.ADMIN_ID;
      const page = req.body.page;
