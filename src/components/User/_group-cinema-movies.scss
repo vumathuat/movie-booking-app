@@ -1,0 +1,105 @@
+.group-cinema-movies,
+.group-cinema-movies--mobile {
+  .group-cinema {
+    margin: 0;
+    display: -webkit-box;
+    display: flex;
+    -webkit-box-align: center;
+    align-items: center;
+  }
+  .group-cinema-name {
+    font-weight: bold;
+    padding-left: 15px;
+  }
+  .cinema {
+    display: -webkit-box;
+    display: flex;
+    -webkit-box-align: center;
+    align-items: center;
+    .cinema__logo {
+      padding-right: 15px;
+      img {
+        width: 50px;
+      }
+    }
+    .cinema__info {
+      text-transform: none;
+      font-size: $fs-3;
+      position: relative;
+      .cinema__address {
+        display: -webkit-box;
+        -webkit-line-clamp: 1;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-size: 13px;
+        color: #949494;
+        text-transform: none;
+      }
+      .cinema__detail {
+        color: $color-orange-0;
+        font-size: $fs-2;
+      }
+      .cinema__name {
+        display: -webkit-box;
+        -webkit-line-clamp: 1;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        color: $color-black-0;
+        font-size: 15px;
+        font-weight: 500;
+        .group-cinema__name {
+          color: $color-green-1;
+        }
+      }
+    }
+  }
+  .showtime {
+    // width: 120px;
+    margin: 0 10px 10px 0;
+    padding: 2px $pd-0;
+    -webkit-transition: all 0.2s;
+    transition: all 0.2s;
+    display: inline-block;
+    text-align: center;
+    background-color: rgba(246, 246, 246, 0.5);
+    border-radius: 7px;
+    color: $color-gray-1;
+    border: 1px solid #e4e4e4;
+    @include mediaQueryMax("small") {
+      padding: 5px 8px 0 8px;
+      margin: 0 5px 5px 0;
+    }
+    span {
+      font-size: $fs-0;
+      @include mediaQueryMax("small") {
+        font-size: $fs-2;
+      }
+    }
+    .start-time {
+      font-size: $fs-4;
+      font-weight: 500;
+      color: #108f3e;
+      @include mediaQueryMax("small") {
+        display: block;
+        line-height: 1;
+        font-size: $fs-3;
+      }
+    }
+  }
+  .no-showtime {
+    text-align: center;
+    font-weight: bold;
+    padding: $pd-2;
+    background-color: $color-white-0;
+    // border-radius: 0 0 4px 4px;
+  }
+}
+.group-cinema-movies--mobile {
+  border-radius: 4px;
+  overflow: hidden;
+  @include mediaQueryMin("medium") {
+    display: none;
+  }
+}

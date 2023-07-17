@@ -1,0 +1,134 @@
+.list-movie__wrap {
+  position: relative;
+  margin: 75px 100px 0 100px;
+  @include mediaQueryMax("extra-large") {
+    margin: 75px 100px 0 100px;
+  }
+  @include mediaQueryMax("large") {
+    margin: 75px 75px 0 75px;
+  }
+  @include mediaQueryMax("medium") {
+    margin: 50px 50px 0 50px;
+  }
+  @include mediaQueryMax("small") {
+    margin: 5px 0 0 0;
+  }
+  .list-movie {
+    @include mediaQueryMax("small") {
+      display: none;
+    }
+  }
+  .slick-arrow {
+    @include mediaQueryMax("small") {
+      display: none !important;
+    }
+    color: $color-gray-6;
+    opacity: 0.4;
+    z-index: 9;
+    &.slick-prev,
+    &.slick-next {
+      -webkit-transform: translateY(-50%);
+      transform: translateY(-50%);
+      top: 48%;
+      &:hover {
+        color: $color-gray-6;
+        opacity: 1;
+      }
+      &:active {
+        color: $color-orange-1;
+      }
+    }
+    &.slick-prev {
+      left: -38px;
+    }
+    &.slick-next {
+      right: -25px;
+    }
+    &::before {
+      content: none;
+    }
+  }
+  // Modify Navs Bootstrap
+  .nav-tabs .nav-item .nav-link {
+    color: $color-black-0;
+    background: none;
+    font-size: $fs-5;
+    -webkit-transition: all 0.2s;
+    transition: all 0.2s;
+    &:hover {
+      font-size: 24px;
+    }
+  }
+  .nav-tabs .nav-item.show .nav-link,
+  .nav-tabs .nav-link.active {
+    color: $color-orange-1;
+    font-size: 24px;
+  }
+  .nav-tabs .nav-link {
+    border: none;
+  }
+  .nav-tabs {
+    border: none;
+    margin-bottom: 20px;
+  }
+  // End Modify Navs Bootstrap
+  .blank {
+    @include mediaQueryMax("small") {
+      height: 80px;
+    }
+    height: 120px;
+    width: 100%;
+    background: url("/img/blank.png");
+    background-size: 100%;
+    background-repeat: no-repeat;
+    max-width: 940px;
+    margin: auto;
+  }
+}
+
+.list-movie--mobile {
+  @include mediaQueryMin("small") {
+    display: none;
+  }
+  a {
+    color: $color-black-0;
+  }
+  .movie {
+    padding: 0 10px;
+  }
+  .movie__img {
+    height: 276px;
+    border-radius: 4px;
+    overflow: hidden;
+    img {
+      width: 100%;
+      height: 100%;
+    }
+  }
+  .movie__name {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-weight: bold;
+  }
+}
+.showmore {
+  @include mediaQueryMin("small") {
+    display: none;
+  }
+  #showmore-btn {
+    &:focus {
+      box-shadow: none;
+    }
+    font-size: 14px;
+    color: #949494;
+    border: 1px solid #949494;
+    border-radius: 4px;
+    background: 0 0;
+    padding: 7px 25px;
+    -webkit-transition: all 0.2s;
+    transition: all 0.2s;
+    margin: 20px auto;
+    display: block;
+  }
+}

@@ -1,0 +1,64 @@
+.cinema-movies {
+  .movie--small {
+    display: -webkit-box;
+    display: flex;
+    -webkit-box-align: center;
+    align-items: center;
+    .movie__img {
+      width: 50px;
+      height: 50px;
+    }
+    .movie__info {
+      padding-left: 10px;
+      span {
+        display: block;
+        font-size: $fs-0;
+      }
+      .movie__name {
+        font-weight: bold;
+        font-size: $fs-3;
+      }
+    }
+  }
+  .showtime {
+    width: 120px;
+    margin: 0 10px 10px 0;
+    padding: $pd-0 0;
+    -webkit-transition: all 0.2s;
+    transition: all 0.2s;
+    display: inline-block;
+    text-align: center;
+    background-color: rgba(246, 246, 246, 0.5);
+    border-radius: 7px;
+    color: $color-gray-1;
+    border: 1px solid #e4e4e4;
+    @include mediaQueryMax("medium") {
+      width: 100px;
+      margin: 0 8px 8px 0;
+      padding: 2px 0;
+      border-radius: 5px;
+    }
+    span {
+      font-size: $fs-0;
+      @include mediaQueryMax("medium") {
+        font-size: $fs-2;
+      }
+    }
+    .start-time {
+      font-size: $fs-4;
+      font-weight: 500;
+      color: #108f3e;
+      @include mediaQueryMax("medium") {
+        font-size: $fs-3;
+      }
+    }
+  }
+  .no-showtime {
+    text-align: center;
+    font-weight: bold;
+    padding: $pd-2;
+    @include mediaQueryMax("medium") {
+      padding: 15px;
+    }
+  }
+}

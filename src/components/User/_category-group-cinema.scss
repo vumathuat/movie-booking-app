@@ -1,0 +1,25 @@
+.caterogy-group-cinema {
+  .group-cinema-icon {
+    &::after {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      width: calc(100% - 40px);
+      -webkit-transform: translateX(-50%);
+      transform: translateX(-50%);
+      border-bottom: 1px solid $color-white-0;
+      border-color: rgba(238, 238, 238, 0.88);
+    }
+  }
+  .group-cinema-name {
+    padding-left: 10px;
+    font-size: $fs-3;
+    font-weight: 500;
+    color: $color-black-0;
+    text-transform: none;
+    @include mediaQueryMax("medium") {
+      display: none;
+    }
+  }
+}

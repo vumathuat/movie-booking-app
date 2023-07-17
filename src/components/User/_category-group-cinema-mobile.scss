@@ -1,0 +1,52 @@
+.category-group-cinema--mobile {
+    border-radius: 4px;
+    overflow: hidden;
+    @include mediaQueryMin('medium') {
+        display: none;
+    }
+    .group-cinema--mobile {
+        margin: 0;
+        .group-cinema-name {
+            margin-left: 10px;
+            font-weight: bold;
+        }
+    }
+    .cinema {
+        display: -webkit-box;
+        display: flex;
+        -webkit-box-align: center;
+        align-items: center;
+        .cinema__info {
+            text-transform: none;
+            font-size: $fs-3;
+            position: relative;
+            .cinema__address {
+                display: -webkit-box;
+                -webkit-line-clamp: 1;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                font-size: 13px;
+                color: #949494;
+                text-transform: none;
+            }
+            .cinema__detail {
+                color: $color-orange-0;
+                font-size: $fs-0;
+            }
+            .cinema__name {
+                display: -webkit-box;
+                -webkit-line-clamp: 1;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                color: $color-black-0;
+                font-size: 15px;
+                font-weight: 500;
+                .group-cinema__name {
+                    color: $color-green-1;
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,26 @@
+.home-tool {
+  @include mediaQueryMin("medium") {
+    display: -webkit-box;
+    display: flex;
+    -webkit-box-pack: center;
+    justify-content: center;
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    -webkit-transform: translate(50%, 50%);
+    transform: translate(-50%, 50%);
+    a {
+      width: 100%;
+    }
+  }
+  @include mediaQueryMax("medium") {
+    display: none;
+  }
+  .quick-ticket-booking {
+    padding: 8px 25px;
+    white-space: nowrap;
+    @include mediaQueryMax("small") {
+      width: 100%;
+    }
+  }
+}

@@ -1,0 +1,68 @@
+.logo-loading {
+    position: fixed;
+    width: 100%;
+    margin: 0 auto;
+    top: 59px;
+    height: 100%;
+    z-index: 10;
+    background-color: #fff;
+    transition: opacity 0.5s ease-in-out;
+    animation: fade 1s linear 3s forwards;
+}
+
+@keyframes fade {
+    from {
+        visibility: visible;
+        opacity: 1;
+    }
+    to {
+        visibility: hidden;
+        opacity: 0;
+    }
+}
+.logo-loading img {
+    position: absolute;
+    top: 40%;
+    left: 45%;
+    transform: translate(-50%, -50%);
+    width: 10%;
+}
+
+.animated {
+    opacity: 0;
+    animation-duration: 3s;
+    animation-fill-mode: both;
+}
+.animated.infinite {
+    animation-iteration-count: infinite;
+}
+.animated.hinge {
+    animation-duration: 0.5s;
+}
+
+@keyframes tada {
+    from {
+        opacity: 1;
+        transform: scale3d(1, 1, 1);
+    }
+    10%,
+    30%,
+    50%,
+    70%,
+    90% {
+        transform: scale3d(1.1, 1.1, 1.1) rotate3d(0, 0, 1, 7deg);
+    }
+    20%,
+    40%,
+    60%,
+    80% {
+        transform: scale3d(1.1, 1.1, 1.1) rotate3d(0, 0, 1, -7deg);
+    }
+    to {
+        opacity: 0;
+        transform: scale3d(1, 1, 1);
+    }
+}
+.tada {
+    animation-name: tada;
+}

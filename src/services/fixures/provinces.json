@@ -1,0 +1,46 @@
+[
+    {
+        "id": 1,
+        "name": "Hà Nội"
+    },
+    {
+        "id": 2,
+        "name": "Ho Chi Minh City"
+    },
+    {
+        "id": 3,
+        "name": "Da Nang"
+    },
+    {
+        "id": 4,
+        "name": "Binh Duong"
+    },
+    {
+        "id": 5,
+        "name": "Soc Trang"
+    },
+    {
+        "id": 6,
+        "name": "Kon Tum"
+    },
+    {
+        "id": 7,
+        "name": "Quang Binh"
+    },
+    {
+        "id": 8,
+        "name": "Quang Tri"
+    },
+    {
+        "id": 9,
+        "name": "Tra Vinh"
+    },
+    {
+        "id": 10,
+        "name": "Hau Giang"
+    },
+    {
+        "id": 11,
+        "name": "Son La"
+    }
+]
