@@ -480,26 +480,40 @@ app.post('/booking', getToken.tokenExist, getToken.validateToken, async (req, re
                 if (err) throw (err)
                 res.status(401).json({ data: '', message: 'Timer ran out!' });
             } else {
-                await conn.query(reservation_query, async (err, taken) => {
+                await conn.beginTransaction((err) => {
                     if (err) throw (err)
 
-                    if (taken.length != 0) { //check for duplicate reservation
-                        conn.release();
+                    await conn.query(reservation_query, async (err, taken) => {
                         if (err) throw (err)
-                        res.status(401).json({ data: '', message: 'Seats are unavailable!' });
-                    } else {
-                        await conn.query(price_query, async (err, price) => { //get price of the seat
+
+                        if (taken.length != 0) { //check for duplicate reservation
+                            conn.rollback();
+                            conn.release();
                             if (err) throw (err)
-
-                            amount = price['pr.price_amt'];
-
-                            await conn.query(booking_query, (err) => {
+                            res.status(401).json({ data: '', message: 'Seats are unavailable!' });
+                        } else {
+                            await conn.query(price_query, async (err, price) => { //get price of the seat
                                 if (err) throw (err)
-                                conn.release();
-                                res.status(200).json({ data: '', message: 'Booking successful!' });
+
+                                amount = price['pr.price_amt'];
+
+                                await conn.query(booking_query, (err) => {
+                                    if (err) throw (err)
+
+                                    conn.commit((err) => {
+                                        if (err) {
+                                            conn.rollback();
+                                            conn.release();
+                                            res.status(500).json({ data: '', message: 'Booking failed!' });
+                                        } else {
+                                            conn.release();
+                                            res.status(200).json({ data: '', message: 'Booking successful!' });
+                                        }
+                                    })
+                                })
                             })
-                        })
-                    }
+                        }
+                    })
                 })
             }
         })
