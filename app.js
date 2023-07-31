@@ -11,12 +11,14 @@ const https = require('https');
 const crypto = require('crypto');
 const db_conn = require('./db_connect');
 const getToken = require('./getToken');
+var cors = require('cors');
 const { error } = require('console');
 const { ALL } = require('dns');
 
 const app = express();
 app.use(express.json());
 app.use(cookieParser());
+app.use(cors());
 
 //test function
 app.get('/test', (req, res) => {
