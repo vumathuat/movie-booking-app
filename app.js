@@ -239,7 +239,7 @@ app.post('/update_user', getToken.tokenExist, getToken.validateToken, getToken.v
             })
         })
     } else {
-    	if (update_fields.length != 1) {
+        if (update_fields.length != 1) {
             res.status(400).json({ data: '', message: 'Invalid number of fields!' });
             return next();
         }
@@ -315,7 +315,7 @@ app.get('/manageUsers', getToken.tokenExist, getToken.validateToken, getToken.va
         await conn.query(user_query, (err, result) => {
             if (err) throw (err.message)
 
-            res.status(200).json({ data: result, message: 'ok' });
+            res.status(200).json(result);
         })
     })
 });
@@ -345,7 +345,7 @@ app.get('/search_films', async (req, res) => {//paramter: page, search, (array) 
         sql_search += ' DATE_FORMAT(s.time_start, "%Y-%m-%d") = ? AND DATE_FORMAT(s.time_start, "%H:%i") > ?';
         params.push(req.body.date, req.body.time);
     }
-    /*if (typeof req.body.genre != "undefined") {
+    if (typeof req.body.genre != "undefined") {
         if (!sql_search.match(/where/i)) {
             sql_search += ' WHERE';
         } else {
@@ -360,7 +360,7 @@ app.get('/search_films', async (req, res) => {//paramter: page, search, (array) 
             sql_search += ' genre REGEXP ?';
             params.push(genres[i]);
         }
-    }*/
+    }
 
     params.push(begin, end);
     sql_search += ') SELECT * FROM Paging WHERE RowNum BETWEEN ? AND ?';
@@ -371,28 +371,42 @@ app.get('/search_films', async (req, res) => {//paramter: page, search, (array) 
             conn.release();
             if (err) throw (err.message)
 
-            res.status(200).json({ data: result, message: 'ok' });
+            res.status(200).json(result);
         })
     })
 })
 
 //flims list
 app.get('/films', async (req, res) => {//return up to 8 newest films and 8 upcoming films
-    const new_films_query = 'WITH Paging AS ( SELECT *, ROW_NUMBER() OVER (ORDER BY release_date) AS RowNum FROM Movie WHERE DATE_FORMAT(NOW(), "%Y-%m-%d") > release_date) SELECT * FROM Paging WHERE RowNum BETWEEN 1 AND 8';
-    const upcoming_films_query = 'WITH Paging AS ( SELECT *, ROW_NUMBER() OVER (ORDER BY release_date) AS RowNum FROM Movie WHERE DATE_FORMAT(NOW(), "%Y-%m-%d") < release_date) SELECT * FROM Paging WHERE RowNum BETWEEN 1 AND 8';
+    if (typeof movie_id != "undefined") {
+        const movie_id = req.body.movie_id;
+        const film_detail = 'SELECT * FROM Movie WHERE movie_id = ?';
+        const query_one_film = mysql.format(film_detail, [movie_id]);
 
-    db_conn.pool.getConnection(async (err, conn) => {
-        await conn.query(new_films_query, async (err, new_films) => {
-            if (err) throw (err)
-
-            await conn.query(upcoming_films_query, (err, upcoming_films) => {
-                conn.release();
+        db_conn.pool.getConnection(async (err, conn) => {
+            await conn.query(new_films_query, async (err, film) => {
                 if (err) throw (err)
 
-                res.status(200).json({ data: { new_films: new_films, upcoming_films: upcoming_films }, message: 'ok' });
+                res.status(200).json(film);
             })
-        })
-    });
+        });
+    } else {
+        const new_films_query = 'WITH Paging AS ( SELECT *, ROW_NUMBER() OVER (ORDER BY release_date) AS RowNum FROM Movie WHERE DATE_FORMAT(NOW(), "%Y-%m-%d") > release_date) SELECT * FROM Paging WHERE RowNum BETWEEN 1 AND 8';
+        const upcoming_films_query = 'WITH Paging AS ( SELECT *, ROW_NUMBER() OVER (ORDER BY release_date) AS RowNum FROM Movie WHERE DATE_FORMAT(NOW(), "%Y-%m-%d") < release_date) SELECT * FROM Paging WHERE RowNum BETWEEN 1 AND 8';
+
+        db_conn.pool.getConnection(async (err, conn) => {
+            await conn.query(new_films_query, async (err, new_films) => {
+                if (err) throw (err)
+
+                await conn.query(upcoming_films_query, (err, upcoming_films) => {
+                    conn.release();
+                    if (err) throw (err)
+
+                    res.status(200).json(Object.assign(new_films, upcoming_films));
+                })
+            })
+        });
+    }
 });
 
 //query film schedule
@@ -404,7 +418,7 @@ app.get('/schedule', async (req, res) => {
             conn.release();
             if (err) throw (err.message)
 
-            res.status(200).json({ data: result, message: 'ok' });
+            res.status(200).json(result);
         })
     });
 });
@@ -429,7 +443,6 @@ app.get('/seatLayout', getToken.tokenExist, getToken.validateToken, async (req, 
         await conn.query(allSeat_query, async (err, allSeat) => {
             if (err) throw (err.message)
             await conn.query(rsSeat_query, (err, rsSeat) => {
-                conn.release();
                 if (err) throw (err.message)
                 res.status(200).json({ data: { allSeat: allSeat, taken: rsSeat }, message: 'ok' });
             })
@@ -482,7 +495,7 @@ app.post('/booking', getToken.tokenExist, getToken.validateToken, async (req, re
                 if (err) throw (err)
                 res.status(401).json({ data: '', message: 'Timer ran out!' });
             } else {
-                await conn.beginTransaction(async (err) => {
+                await conn.beginTransaction((err) => {
                     if (err) throw (err)
 
                     await conn.query(reservation_query, async (err, taken) => {
