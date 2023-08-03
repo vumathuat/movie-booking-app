@@ -184,7 +184,7 @@ app.get('/account', getToken.tokenExist, getToken.validateToken, async (req, res
             conn.release();
             if (err) throw (err)
 
-            res.status(200).json({ data: result, message: 'ok' });
+            res.status(200).json(result);
         })
     })
 });
@@ -495,7 +495,7 @@ app.post('/booking', getToken.tokenExist, getToken.validateToken, async (req, re
                 if (err) throw (err)
                 res.status(401).json({ data: '', message: 'Timer ran out!' });
             } else {
-                await conn.beginTransaction((err) => {
+                await conn.beginTransaction(async (err) => {
                     if (err) throw (err)
 
                     await conn.query(reservation_query, async (err, taken) => {
