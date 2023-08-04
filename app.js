@@ -430,8 +430,6 @@ app.get('/seatLayout', getToken.tokenExist, getToken.validateToken, async (req, 
 
     const timer_update = 'UPDATE Users SET timer = NOW() WHERE user_id = ?';
     const timer_query = mysql.format(timer_update, [user_id]);
-    const allSeat_search = 'SELECT sr.screening_id, s.seat_id, s.number, s.row FROM Screening sr INNER JOIN Seat s ON sr.room_id = s.room_id WHERE sr.screening_id = ?';
-    const allSeat_query = mysql.format(allSeat_search, [screening_id]);
     const rsSeat = 'SELECT * FROM Seat_Reservation WHERE screening_id = ?';
     const rsSeat_query = mysql.format(rsSeat, [screening_id]);
 
@@ -440,12 +438,10 @@ app.get('/seatLayout', getToken.tokenExist, getToken.validateToken, async (req, 
             if (err) throw (err.message)
         })
 
-        await conn.query(allSeat_query, async (err, allSeat) => {
+        await conn.query(rsSeat_query, (err, rsSeat) => {
             if (err) throw (err.message)
-            await conn.query(rsSeat_query, (err, rsSeat) => {
-                if (err) throw (err.message)
-                res.status(200).json({ data: { allSeat: allSeat, taken: rsSeat }, message: 'ok' });
-            })
+
+            res.status(200).json(rsSeat);
         })
     });
 });
