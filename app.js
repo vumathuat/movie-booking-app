@@ -184,7 +184,7 @@ app.get('/account', getToken.tokenExist, getToken.validateToken, async (req, res
             conn.release();
             if (err) throw (err)
 
-            res.status(200).json({ data: result, message: 'ok' });
+            res.status(200).json(result);
         })
     })
 });
@@ -411,16 +411,36 @@ app.get('/films', async (req, res) => {//return up to 8 newest films and 8 upcom
 
 //query film schedule
 app.get('/schedule', async (req, res) => {
-    const sql_search = 'SELECT s.screening_id, DATE_FORMAT(s.time_start, "%Y-%m-%d") AS time_start_d, DATE_FORMAT(s.time_start, "%H:%i") as time_start_t, s.price_id, m.title, m.rating, m.duration FROM Screening s INNER JOIN Movie m ON m.movie_id = s.movie_id';
+    if (typeof req.query.id != "undefined") {
+        const movie_id = req.query.id;
+        const sql_search = 'SELECT screening_id, DATE_FORMAT(time_start, "%Y-%m-%d") AS time_start_d, DATE_FORMAT(time_start, "%H:%i") as time_start_t FROM Screening WHERE movie_id = ?';
+        const query_one_film = mysql.format(sql_search, [movie_id]);
+        await db_conn.pool.getConnection(async (err, conn) => {
+            await conn.query(query_one_film, (err, result) => {
+                conn.release();
+                if (err) throw (err.message)
 
-    await db_conn.pool.getConnection(async (err, conn) => {
-        await conn.query(sql_search, (err, result) => {
-            conn.release();
-            if (err) throw (err.message)
+                res.status(200).json(result);
+            })
+        });
+    } else {
+        const sql_search = 'SELECT s.screening_id, DATE_FORMAT(s.time_start, "%Y-%m-%d") AS time_start_d, DATE_FORMAT(s.time_start, "%H:%i") as time_start_t, s.price_id, m.title, m.rating, m.duration FROM Screening s INNER JOIN Movie m ON m.movie_id = s.movie_id';
 
+<<<<<<< HEAD
             res.status(200).json(result);
         })
     });
+=======
+        await db_conn.pool.getConnection(async (err, conn) => {
+            await conn.query(sql_search, (err, result) => {
+                conn.release();
+                if (err) throw (err.message)
+
+                res.status(200).json(result);
+            })
+        });
+    }
+>>>>>>> 4656664b82119e9e6f76fbf920b15c5cdde32b22
 });
 
 //query seat layout
@@ -430,8 +450,6 @@ app.get('/seatLayout', getToken.tokenExist, getToken.validateToken, async (req, 
 
     const timer_update = 'UPDATE Users SET timer = NOW() WHERE user_id = ?';
     const timer_query = mysql.format(timer_update, [user_id]);
-    const allSeat_search = 'SELECT sr.screening_id, s.seat_id, s.number, s.row FROM Screening sr INNER JOIN Seat s ON sr.room_id = s.room_id WHERE sr.screening_id = ?';
-    const allSeat_query = mysql.format(allSeat_search, [screening_id]);
     const rsSeat = 'SELECT * FROM Seat_Reservation WHERE screening_id = ?';
     const rsSeat_query = mysql.format(rsSeat, [screening_id]);
 
@@ -440,12 +458,17 @@ app.get('/seatLayout', getToken.tokenExist, getToken.validateToken, async (req, 
             if (err) throw (err.message)
         })
 
-        await conn.query(allSeat_query, async (err, allSeat) => {
+        await conn.query(rsSeat_query, (err, rsSeat) => {
             if (err) throw (err.message)
+<<<<<<< HEAD
             await conn.query(rsSeat_query, (err, rsSeat) => {
                 if (err) throw (err.message)
                 res.status(200).json({ data: { allSeat: allSeat, taken: rsSeat }, message: 'ok' });
             })
+=======
+
+            res.status(200).json(rsSeat);
+>>>>>>> 4656664b82119e9e6f76fbf920b15c5cdde32b22
         })
     });
 });
@@ -495,7 +518,7 @@ app.post('/booking', getToken.tokenExist, getToken.validateToken, async (req, re
                 if (err) throw (err)
                 res.status(401).json({ data: '', message: 'Timer ran out!' });
             } else {
-                await conn.beginTransaction((err) => {
+                await conn.beginTransaction(async (err) => {
                     if (err) throw (err)
 
                     await conn.query(reservation_query, async (err, taken) => {
