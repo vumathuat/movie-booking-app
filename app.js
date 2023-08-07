@@ -469,7 +469,12 @@ app.get('/seatLayout', getToken.tokenExist, getToken.validateToken, async (req, 
 app.post('/booking', getToken.tokenExist, getToken.validateToken, async (req, res, next) => { //parameter: screening_id, seat_id
     const user_id = req.user.user_id;
     const screening_id = req.body.screening_id;
-    const seat_id = req.body.seat_id.split(",");
+    if (typeof seat_id == "string") {
+        const seat_id = req.body.seat_id.split(",");
+    } else {
+        res.status(400).json({ data: '', message: 'Wrong seat_id format!' });
+        return next();
+    }
     const transaction_id = uuid.v4(); //need to create a unique id here
     let amount = '';
     let input = [];
@@ -479,6 +484,7 @@ app.post('/booking', getToken.tokenExist, getToken.validateToken, async (req, re
 
     if (!screening_id || !seat_id) {
         res.status(400).json({ data: '', message: 'Fields Missing!' });
+        return next();
     }
 
     const timer_search = 'SELECT NOW() - (SELECT timer from Users WHERE user_id =?) AS time';
@@ -487,8 +493,12 @@ app.post('/booking', getToken.tokenExist, getToken.validateToken, async (req, re
     let reservation_check = 'SELECT screening_id, seat_id FROM Seat_Reservation WHERE screening_id = ?';
 
     let booking_insert = 'INSERT INTO Ticket_transac VALUES (?,NOW(),?);';//create the seat reservation and transaction
-    seat_id.forEach((item) => {
-        reservation_check += ' OR seat_id = ?';
+    seat_id.forEach((item, index) => {
+        if (index = 0) {
+            reservation_check += ' AND seat_id = ?';
+        } else {
+            reservation_check += ' OR seat_id = ?';
+        }
         search.push(item);
         booking_insert += ' INSERT INTO Seat_Reservation VALUES (?,?,?,?);';
         input.push(uuid.v4(), item, transaction_id, screening_id);
@@ -550,4 +560,5 @@ app.post('/booking', getToken.tokenExist, getToken.validateToken, async (req, re
     })
 });
 
-module.exports = app;
+module.exports = app;
+
