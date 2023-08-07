@@ -332,7 +332,7 @@ app.get('/search_films', async (req, res) => {//paramter: page, search, (array) 
     const begin = end - 7;
     let params = [];
 
-    let sql_search = 'WITH Paging AS ( SELECT m.movie_id, m.title, m.director, m.cast, m.description, DATE_FORMAT(m.release_date, "%Y-%m-%d") AS release_date, m.duration, m.poster, ROW_NUMBER() OVER (ORDER BY movie_id) AS RowNum FROM Movie m INNER JOIN Screening s ON m.movie_id=s.movie_id';
+    let sql_search = 'SELECT DISTINCT m.movie_id, m.title, m.director, m.cast, m.description, DATE_FORMAT(m.release_date, "%Y-%m-%d") AS release_date, m.duration, m.poster FROM Movie m INNER JOIN Screening s ON m.movie_id=s.movie_id';
     if (typeof req.body.search != "undefined") {
         sql_search += ' WHERE m.title REGEXP ?';
         const search = '^' + req.body.search;
@@ -344,7 +344,7 @@ app.get('/search_films', async (req, res) => {//paramter: page, search, (array) 
         } else {
             sql_search += ' AND';
         }
-        sql_search += ' DATE_FORMAT(s.time_start, "%Y-%m-%d") = ? AND DATE_FORMAT(s.time_start, "%H:%i") = ?';
+        sql_search += ' DATE_FORMAT(s.time_start, "%Y-%m-%d") = ? AND DATE_FORMAT(s.time_start, "%H:%i") >= ?';
         params.push(req.body.date, req.body.time);
     }
     if (typeof req.body.genre != "undefined") {
@@ -363,9 +363,6 @@ app.get('/search_films', async (req, res) => {//paramter: page, search, (array) 
             params.push(genres[i]);
         }
     }
-
-    params.push(begin, end);
-    sql_search += ') SELECT * FROM Paging WHERE RowNum BETWEEN ? AND ?';
     const movieSearch_query = mysql.format(sql_search, params);
 
     await db_conn.pool.getConnection(async (err, conn) => {
@@ -376,7 +373,7 @@ app.get('/search_films', async (req, res) => {//paramter: page, search, (array) 
             res.status(200).json(result);
         })
     })
-})
+});
 
 //flims list
 app.get('/films', async (req, res) => {//return up to 8 newest films and 8 upcoming films
@@ -553,4 +550,4 @@ app.post('/booking', getToken.tokenExist, getToken.validateToken, async (req, re
     })
 });
 
-module.exports = app;
+module.exports = app;
