@@ -11,7 +11,9 @@ const https = require('https');
 const crypto = require('crypto');
 const db_conn = require('./db_connect');
 const getToken = require('./getToken');
-var cors = require('cors');
+const cors = require('cors');
+const moment = require('moment');
+
 const { error } = require('console');
 const { ALL } = require('dns');
 
@@ -342,7 +344,7 @@ app.get('/search_films', async (req, res) => {//paramter: page, search, (array) 
         } else {
             sql_search += ' AND';
         }
-        sql_search += ' DATE_FORMAT(s.time_start, "%Y-%m-%d") = ? AND DATE_FORMAT(s.time_start, "%H:%i") > ?';
+        sql_search += ' DATE_FORMAT(s.time_start, "%Y-%m-%d") = ? AND DATE_FORMAT(s.time_start, "%H:%i") = ?';
         params.push(req.body.date, req.body.time);
     }
     if (typeof req.body.genre != "undefined") {
@@ -378,32 +380,26 @@ app.get('/search_films', async (req, res) => {//paramter: page, search, (array) 
 
 //flims list
 app.get('/films', async (req, res) => {//return up to 8 newest films and 8 upcoming films
-    if (typeof movie_id != "undefined") {
-        const movie_id = req.body.movie_id;
+    if (typeof req.query.id != "undefined") {
+        const movie_id = req.query.id;
         const film_detail = 'SELECT * FROM Movie WHERE movie_id = ?';
         const query_one_film = mysql.format(film_detail, [movie_id]);
 
         db_conn.pool.getConnection(async (err, conn) => {
-            await conn.query(new_films_query, async (err, film) => {
+            await conn.query(query_one_film, async (err, film) => {
                 if (err) throw (err)
 
                 res.status(200).json(film);
             })
         });
     } else {
-        const new_films_query = 'WITH Paging AS ( SELECT *, ROW_NUMBER() OVER (ORDER BY release_date) AS RowNum FROM Movie WHERE DATE_FORMAT(NOW(), "%Y-%m-%d") > release_date) SELECT * FROM Paging WHERE RowNum BETWEEN 1 AND 8';
-        const upcoming_films_query = 'WITH Paging AS ( SELECT *, ROW_NUMBER() OVER (ORDER BY release_date) AS RowNum FROM Movie WHERE DATE_FORMAT(NOW(), "%Y-%m-%d") < release_date) SELECT * FROM Paging WHERE RowNum BETWEEN 1 AND 8';
+        const new_films_query = 'SELECT * FROM Movie';
 
         db_conn.pool.getConnection(async (err, conn) => {
-            await conn.query(new_films_query, async (err, new_films) => {
+            await conn.query(new_films_query, async (err, all_films) => {
                 if (err) throw (err)
 
-                await conn.query(upcoming_films_query, (err, upcoming_films) => {
-                    conn.release();
-                    if (err) throw (err)
-
-                    res.status(200).json(Object.assign(new_films, upcoming_films));
-                })
+                res.status(200).json(all_films);
             })
         });
     }
@@ -413,12 +409,24 @@ app.get('/films', async (req, res) => {//return up to 8 newest films and 8 upcom
 app.get('/schedule', async (req, res) => {
     if (typeof req.query.id != "undefined") {
         const movie_id = req.query.id;
-        const sql_search = 'SELECT screening_id, DATE_FORMAT(time_start, "%Y-%m-%d") AS time_start_d, DATE_FORMAT(time_start, "%H:%i") as time_start_t FROM Screening WHERE movie_id = ?';
+        const sql_search = 'SELECT screening_id, duration, DATE_FORMAT(time_start, "%Y-%m-%d %H:%i") as time_start FROM Screening s INNER JOIN Movie m ON m.movie_id = s.movie_id WHERE m.movie_id = ?';
         const query_one_film = mysql.format(sql_search, [movie_id]);
         await db_conn.pool.getConnection(async (err, conn) => {
             await conn.query(query_one_film, (err, result) => {
                 conn.release();
                 if (err) throw (err.message)
+                result.forEach((item) => {
+                    const hours = (item.duration / 60);
+                    const rhours = Math.floor(hours);
+                    const minutes = (hours - rhours) * 60;
+                    const rminutes = Math.round(minutes);
+                    const time_start_d = moment(item.time_start).format("YYYY-MM-DD");
+                    const time_start_t = moment(item.time_start).format("HH:mm");
+                    const time_end = moment(moment(item.time_start).add(rhours, 'h')).add(rminutes, 'm').format("HH:mm");
+                    item.time_start_d = time_start_d;
+                    item.time_start_t = time_start_t;
+                    item.time_end = time_end;
+                })
 
                 res.status(200).json(result);
             })
@@ -426,11 +434,6 @@ app.get('/schedule', async (req, res) => {
     } else {
         const sql_search = 'SELECT s.screening_id, DATE_FORMAT(s.time_start, "%Y-%m-%d") AS time_start_d, DATE_FORMAT(s.time_start, "%H:%i") as time_start_t, s.price_id, m.title, m.rating, m.duration FROM Screening s INNER JOIN Movie m ON m.movie_id = s.movie_id';
 
-<<<<<<< HEAD
-            res.status(200).json(result);
-        })
-    });
-=======
         await db_conn.pool.getConnection(async (err, conn) => {
             await conn.query(sql_search, (err, result) => {
                 conn.release();
@@ -440,7 +443,6 @@ app.get('/schedule', async (req, res) => {
             })
         });
     }
->>>>>>> 4656664b82119e9e6f76fbf920b15c5cdde32b22
 });
 
 //query seat layout
@@ -460,15 +462,8 @@ app.get('/seatLayout', getToken.tokenExist, getToken.validateToken, async (req, 
 
         await conn.query(rsSeat_query, (err, rsSeat) => {
             if (err) throw (err.message)
-<<<<<<< HEAD
-            await conn.query(rsSeat_query, (err, rsSeat) => {
-                if (err) throw (err.message)
-                res.status(200).json({ data: { allSeat: allSeat, taken: rsSeat }, message: 'ok' });
-            })
-=======
 
             res.status(200).json(rsSeat);
->>>>>>> 4656664b82119e9e6f76fbf920b15c5cdde32b22
         })
     });
 });
