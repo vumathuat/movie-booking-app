@@ -406,7 +406,7 @@ app.get('/films', async (req, res) => {//return up to 8 newest films and 8 upcom
 app.get('/schedule', async (req, res) => {
     if (typeof req.query.id != "undefined") {
         const movie_id = req.query.id;
-        const sql_search = 'SELECT screening_id, duration, DATE_FORMAT(time_start, "%Y-%m-%d %H:%i") as time_start, movie_id FROM Screening s INNER JOIN Movie m ON m.movie_id = s.movie_id WHERE m.movie_id = ?';
+        const sql_search = 'SELECT screening_id, duration, DATE_FORMAT(time_start, "%Y-%m-%d %H:%i") as time_start FROM Screening s INNER JOIN Movie m ON m.movie_id = s.movie_id WHERE m.movie_id = ?';
         const query_one_film = mysql.format(sql_search, [movie_id]);
         await db_conn.pool.getConnection(async (err, conn) => {
             await conn.query(query_one_film, (err, result) => {
@@ -429,16 +429,7 @@ app.get('/schedule', async (req, res) => {
             })
         });
     } else {
-        const sql_search = 'SELECT s.screening_id, DATE_FORMAT(s.time_start, "%Y-%m-%d") AS time_start_d, DATE_FORMAT(s.time_start, "%H:%i") as time_start_t, s.price_id, m.title, m.rating, m.duration FROM Screening s INNER JOIN Movie m ON m.movie_id = s.movie_id';
-
-        await db_conn.pool.getConnection(async (err, conn) => {
-            await conn.query(sql_search, (err, result) => {
-                conn.release();
-                if (err) throw (err.message)
-
-                res.status(200).json(result);
-            })
-        });
+        res.status(400).json({ data: '', message: 'Missing id param!' });
     }
 });
 
