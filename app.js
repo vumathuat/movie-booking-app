@@ -406,7 +406,7 @@ app.get('/films', async (req, res) => {//return up to 8 newest films and 8 upcom
 app.get('/schedule', async (req, res) => {
     if (typeof req.query.id != "undefined") {
         const movie_id = req.query.id;
-        const sql_search = 'SELECT screening_id, duration, DATE_FORMAT(time_start, "%Y-%m-%d %H:%i") as time_start FROM Screening s INNER JOIN Movie m ON m.movie_id = s.movie_id WHERE m.movie_id = ?';
+        const sql_search = 'SELECT screening_id, m.movie_id, duration, DATE_FORMAT(time_start, "%Y-%m-%d %H:%i") as time_start FROM Screening s INNER JOIN Movie m ON m.movie_id = s.movie_id WHERE m.movie_id = ?';
         const query_one_film = mysql.format(sql_search, [movie_id]);
         await db_conn.pool.getConnection(async (err, conn) => {
             await conn.query(query_one_film, (err, result) => {
@@ -498,7 +498,6 @@ app.post('/booking', getToken.tokenExist, getToken.validateToken, async (req, re
     
     const booking_query = mysql.format(booking_insert, input);
     const reservation_query = mysql.format(reservation_check, search);
-    console.log(reservation_query);
 
     const price_search = 'SELECT pr.price_amt FROM Screening sr INNER JOIN Price pr ON sr.price_id = pr.price_id WHERE screening_id = ?';
     const price_query = mysql.format(price_search, [screening_id]);
