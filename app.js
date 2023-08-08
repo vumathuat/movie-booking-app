@@ -406,7 +406,7 @@ app.get('/films', async (req, res) => {//return up to 8 newest films and 8 upcom
 app.get('/schedule', async (req, res) => {
     if (typeof req.query.id != "undefined") {
         const movie_id = req.query.id;
-        const sql_search = 'SELECT screening_id, duration, DATE_FORMAT(time_start, "%Y-%m-%d %H:%i") as time_start FROM Screening s INNER JOIN Movie m ON m.movie_id = s.movie_id WHERE m.movie_id = ?';
+        const sql_search = 'SELECT screening_id, duration, DATE_FORMAT(time_start, "%Y-%m-%d %H:%i") as time_start, movie_id FROM Screening s INNER JOIN Movie m ON m.movie_id = s.movie_id WHERE m.movie_id = ?';
         const query_one_film = mysql.format(sql_search, [movie_id]);
         await db_conn.pool.getConnection(async (err, conn) => {
             await conn.query(query_one_film, (err, result) => {
@@ -469,8 +469,9 @@ app.get('/seatLayout', getToken.tokenExist, getToken.validateToken, async (req, 
 app.post('/booking', getToken.tokenExist, getToken.validateToken, async (req, res, next) => { //parameter: screening_id, seat_id
     const user_id = req.user.user_id;
     const screening_id = req.body.screening_id;
+    let seat_id = req.body.seat_id;
     if (typeof seat_id == "string") {
-        const seat_id = req.body.seat_id.split(",");
+        seat_id = req.body.seat_id.split(",");
     } else {
         res.status(400).json({ data: '', message: 'Wrong seat_id format!' });
         return next();
@@ -494,7 +495,7 @@ app.post('/booking', getToken.tokenExist, getToken.validateToken, async (req, re
 
     let booking_insert = 'INSERT INTO Ticket_transac VALUES (?,NOW(),?);';//create the seat reservation and transaction
     seat_id.forEach((item, index) => {
-        if (index = 0) {
+        if (index == 0) {
             reservation_check += ' AND seat_id = ?';
         } else {
             reservation_check += ' OR seat_id = ?';
@@ -503,8 +504,10 @@ app.post('/booking', getToken.tokenExist, getToken.validateToken, async (req, re
         booking_insert += ' INSERT INTO Seat_Reservation VALUES (?,?,?,?);';
         input.push(uuid.v4(), item, transaction_id, screening_id);
     })
+    
     const booking_query = mysql.format(booking_insert, input);
     const reservation_query = mysql.format(reservation_check, search);
+    console.log(reservation_query);
 
     const price_search = 'SELECT pr.price_amt FROM Screening sr INNER JOIN Price pr ON sr.price_id = pr.price_id WHERE screening_id = ?';
     const price_query = mysql.format(price_search, [screening_id]);
