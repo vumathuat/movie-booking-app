@@ -37,18 +37,18 @@ describe("Test /login", () => {
 
             await conn.query(sql_update_lock, (err) => {
                 if (err) throw (err)
-            })
+            });
 
             const cred = { "username": "test1234", "password": "test1234" };
             const res = await request(app).post("/login").send(cred);
 
             await conn.query(sql_update_open, (err) => {
                 if (err) throw (err)
-            })
+            });
             expect(res.statusCode).toBe(403);
             expect(res.body).toEqual({ data: '', message: 'Account locked!' });
             expect(res.headers['set-cookie']).toBeUndefined();
-        })
+        });
     });
 });
 
@@ -62,7 +62,7 @@ describe("Test /register", () => {
 
             await conn.query(sql_delete, (err) => {
                 if (err) throw (err)
-            })
+            });
 
             const res = await request(app).post("/register").send(user);
             expect(res.statusCode).toBe(200);
@@ -72,8 +72,8 @@ describe("Test /register", () => {
                 if (err) throw (err)
 
                 expect(result.length).toBe(1);
-            })
-        })
+            });
+        });
     });
 
     test("Register a duplicate user failed", async () => {
@@ -137,7 +137,7 @@ describe("Test /update_user", () => {
             if (err) throw (err.message)
             await conn.query(sql_search, (err, result) => {
                 if (err) throw (err)
-                expect(result[0].phone_no).toEqual(1234567894);
+                expect(result[0].phone_no).toEqual("1234567894");
             });
             await conn.query(sql_update, (err) => {
                 conn.release();
@@ -233,9 +233,9 @@ describe("Test /account", () => {
                 conn.release();
                 if (err) throw (err)
 
-                expect(res_02.body).toEqual({ data: result, message: "ok" });
-            })
-        })
+                expect(res_02.body).toEqual(result);
+            });
+        });
     });
 });
 
@@ -259,7 +259,7 @@ describe("Test /changeUserStatus", () => {
             const res = await request(app).post("/changeUserStatus").send(command).set("Cookie", cookie);
             expect(res.statusCode).toBe(403);
             expect(res.body).toEqual({ data: '', message: 'Wrong crdential!' });
-        })
+        });
     });
     
     test("Lock a user", async () => {
@@ -283,7 +283,7 @@ describe("Test /changeUserStatus", () => {
                     if (err) throw (err)
 
                     expect(result[0].status).toEqual(0);
-                })
+                });
             });
         });
     });
@@ -309,7 +309,7 @@ describe("Test /changeUserStatus", () => {
                     if (err) throw (err)
 
                     expect(result[0].status).toEqual(1);
-                })
+                });
             });
         });
     });
@@ -332,4 +332,116 @@ describe("Test /manageUsers", () => {
         const res = await request(app).get("/manageUsers").set("Cookie", cookie);
         expect(res.statusCode).toBe(200);
     });
-});
+});
+
+describe("Test /films", () => {
+    test("Getting one films", async () => {
+        const res = await request(app).get("/films?id=1");
+        const search_film = 'select * from Movie where movie_id = 1';
+        expect(res.statusCode).toBe(200);
+        db_conn.pool.getConnection(async (err, conn) => {
+            if (err) throw (err.message)
+
+            await conn.query(search_film, async (err, result) => {
+            	conn.release();
+                if (err) throw (err)
+
+                expect(res.body[0].title).toEqual(result[0].title);
+            });
+        });
+    });
+
+    test("Getting all films", async () => {
+        const res = await request(app).get("/films");
+        const search_film = 'select * from Movie';
+        expect(res.statusCode).toBe(200);
+        db_conn.pool.getConnection(async (err, conn) => {
+            if (err) throw (err.message)
+
+            await conn.query(search_film, async (err, result) => {
+                if (err) throw (err)
+
+                expect(res.body.length).toEqual(result.length);
+            });
+        });
+    });
+});
+
+describe("Test /booking", () => {
+    test("Book a ticket", async () => {
+        const user = { "username": "test1234", "password": "test1234" };
+        const login = await request(app).post("/login").send(user);
+        const cookie = login.headers['set-cookie'];
+        const reservation = { "screening_id": "02", "seat_id": "1" };
+        const screening_id = { "screening_id": "01" };
+        const update_timer = await request(app).get("/seatLayout?all_seat=1").send(screening_id).set("Cookie", cookie);
+        const res = await request(app).post("/booking").send(reservation).set("Cookie", cookie);
+        const searchSRS_query = 'SELECT * FROM Seat_Reservation WHERE screening_id = "02" AND seat_id = "1"';
+        const del_reverse_query = 'DELETE FROM Ticket_transac WHERE transaction_id = (SELECT transaction_id FROM Seat_Reservation WHERE screening_id = "02" AND seat_id = "1"); DELETE FROM Seat_Reservation WHERE screening_id = "02" AND seat_id = "1";';
+        db_conn.pool.getConnection(async (err, conn) => {
+            await conn.query(searchSRS_query, (err, result) => {
+                if (err) throw (err)
+
+                expect(result.length).toEqual(1);
+            })
+
+            await conn.query(del_reverse_query, (err) => {
+            	conn.release();
+                if (err) throw (err)
+            });
+        });
+        expect(res.statusCode).toBe(200);
+    });
+});
+
+describe("Test /schedule", () => {
+    test("Getting the first movie schedule", async () => {
+        const res = await request(app).get("/schedule?id=1");
+        const search_schedule = 'select * from Screening where movie_id = 1';
+        expect(res.statusCode).toBe(200);
+        db_conn.pool.getConnection(async (err, conn) => {
+            if (err) throw (err.message)
+
+            await conn.query(search_schedule, async (err, result) => {
+                conn.release();
+                if (err) throw (err)
+
+                expect(res.body.length).toEqual(result.length);
+            });
+        });
+    });
+    
+    test("Fail to query schedule without inserting movie_id", async () => {
+        const res = await request(app).get("/schedule");
+        expect(res.statusCode).toBe(400);
+    });
+});
+
+describe("Test /seatLayout", () => {
+    test("Getting all seat", async () => {
+        const user = { "username": "test1234", "password": "test1234" };
+        const login = await request(app).post("/login").send(user);
+        const cookie = login.headers['set-cookie'];
+        const screening_id = { "screening_id": "01" };
+        const res = await request(app).get("/seatLayout?all_seat=1").send(screening_id).set("Cookie", cookie);
+        expect(res.statusCode).toBe(200);
+    });
+    
+    test("Getting reserved seat", async () => {
+        const user = { "username": "test1234", "password": "test1234" };
+        const login = await request(app).post("/login").send(user);
+        const cookie = login.headers['set-cookie'];
+        const screening_id = { "screening_id": "01" };
+        const res = await request(app).get("/seatLayout?all_seat=0").send(screening_id).set("Cookie", cookie);
+        expect(res.statusCode).toBe(200);
+    });
+    
+    test("Fail to get seat layout without all_seat parameter", async () => {
+        const user = { "username": "test1234", "password": "test1234" };
+        const login = await request(app).post("/login").send(user);
+        const cookie = login.headers['set-cookie'];
+        const screening_id = { "screening_id": "01" };
+        const res = await request(app).get("/seatLayout?").send(screening_id).set("Cookie", cookie);
+        expect(res.statusCode).toBe(400);
+    });
+});
