@@ -428,15 +428,15 @@ app.get('/schedule', async (req, res) => {
 });
 
 //query seat layout
-app.get('/seatLayout', getToken.tokenExist, getToken.validateToken, async (req, res, next) => { //parameter: screening_id
+app.get('/seatLayout', getToken.tokenExist, getToken.validateToken, async (req, res, next) => { //parameter: screening_id, all_seat (NOTE: must query all_seat atleast once before proceed to booking ticket)
     const screening_id = req.body.screening_id;
     const user_id = req.user.user_id;
-    if (typeof req.query.all_seat == "undefined") {
+    if (typeof req.query.all != "undefined") {
         res.status(400).json({ data: '', message: 'Missing param!' });
         return next();
     }
 
-    if (req.query.all_seat == 1 || req.query.all_seat == 0) {
+    if (req.query.all == 1 || req.query.all == 0) {
         const timer_update = 'UPDATE Users SET timer = NOW() WHERE user_id = ?';
         const timer_query = mysql.format(timer_update, [user_id]);
         const rsSeat = 'SELECT * FROM Seat_Reservation WHERE screening_id = ?';
@@ -445,20 +445,22 @@ app.get('/seatLayout', getToken.tokenExist, getToken.validateToken, async (req, 
         const allSeat_query = mysql.format(allSeat, [screening_id]);
 
         await db_conn.pool.getConnection(async (err, conn) => {
-            await conn.query(timer_query, (err) => {
-                if (err) throw (err.message)
-            })
+            if (req.query.all == 1) {
+                await conn.query(timer_query, (err) => {
+                    if (err) throw (err.message)
+                })
 
-            if (req.query.all_seat == 1) {
                 await conn.query(allSeat_query, (err, all_Seat) => {
+                    conn.release();
                     if (err) throw (err.message)
 
                     res.status(200).json(all_Seat);
                 })
             }
 
-            if (req.query.all_seat == 0) {
+            if (req.query.all == 0) {
                 await conn.query(rsSeat_query, (err, rsSeat) => {
+                    conn.release();
                     if (err) throw (err.message)
 
                     res.status(200).json(rsSeat);
