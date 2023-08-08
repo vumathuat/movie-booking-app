@@ -324,12 +324,6 @@ app.get('/manageUsers', getToken.tokenExist, getToken.validateToken, getToken.va
 
 //search film list
 app.get('/search_films', async (req, res) => {//paramter: page, search, (array) genre, date(YYYY-mm-dd), time
-    let page = 1;
-    if (typeof req.body.page != "undefined" && Number.isInteger(req.body.page)) {
-        page = req.body.page;
-    }
-    const end = page * 8;
-    const begin = end - 7;
     let params = [];
 
     let sql_search = 'SELECT DISTINCT m.movie_id, m.title, m.director, m.cast, m.description, DATE_FORMAT(m.release_date, "%Y-%m-%d") AS release_date, m.duration, m.poster FROM Movie m INNER JOIN Screening s ON m.movie_id=s.movie_id';
@@ -434,26 +428,46 @@ app.get('/schedule', async (req, res) => {
 });
 
 //query seat layout
-app.get('/seatLayout', getToken.tokenExist, getToken.validateToken, async (req, res) => { //parameter: screening_id
+app.get('/seatLayout', getToken.tokenExist, getToken.validateToken, async (req, res, next) => { //parameter: screening_id
     const screening_id = req.body.screening_id;
     const user_id = req.user.user_id;
+    if (typeof req.query.all_seat == "undefined") {
+        res.status(400).json({ data: '', message: 'Missing param!' });
+        return next();
+    }
 
-    const timer_update = 'UPDATE Users SET timer = NOW() WHERE user_id = ?';
-    const timer_query = mysql.format(timer_update, [user_id]);
-    const rsSeat = 'SELECT * FROM Seat_Reservation WHERE screening_id = ?';
-    const rsSeat_query = mysql.format(rsSeat, [screening_id]);
+    if (req.query.all_seat == 1 || req.query.all_seat == 0) {
+        const timer_update = 'UPDATE Users SET timer = NOW() WHERE user_id = ?';
+        const timer_query = mysql.format(timer_update, [user_id]);
+        const rsSeat = 'SELECT * FROM Seat_Reservation WHERE screening_id = ?';
+        const rsSeat_query = mysql.format(rsSeat, [screening_id]);
+        const allSeat = 'SELECT seat_id, row, number FROM Seat s INNER JOIN Screening sc ON s.room_id = sc.room_id WHERE sc.screening_id = ?';
+        const allSeat_query = mysql.format(allSeat, [screening_id]);
 
-    await db_conn.pool.getConnection(async (err, conn) => {
-        await conn.query(timer_query, (err) => {
-            if (err) throw (err.message)
-        })
+        await db_conn.pool.getConnection(async (err, conn) => {
+            await conn.query(timer_query, (err) => {
+                if (err) throw (err.message)
+            })
 
-        await conn.query(rsSeat_query, (err, rsSeat) => {
-            if (err) throw (err.message)
+            if (req.query.all_seat == 1) {
+                await conn.query(allSeat_query, (err, all_Seat) => {
+                    if (err) throw (err.message)
 
-            res.status(200).json(rsSeat);
-        })
-    });
+                    res.status(200).json(all_Seat);
+                })
+            }
+
+            if (req.query.all_seat == 0) {
+                await conn.query(rsSeat_query, (err, rsSeat) => {
+                    if (err) throw (err.message)
+
+                    res.status(200).json(rsSeat);
+                })
+            }
+        });
+    } else {
+        res.status(400).json({ data: '', message: 'Invalid param!' });
+    }
 });
 
 //create ticket reservation
