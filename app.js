@@ -429,14 +429,15 @@ app.get('/schedule', async (req, res) => {
 
 //query seat layout
 app.get('/seatLayout', getToken.tokenExist, getToken.validateToken, async (req, res, next) => { //parameter: screening_id, all_seat (NOTE: must query all_seat atleast once before proceed to booking ticket)
-    const screening_id = req.body.screening_id;
+    const screening_id = req.query.scr_id;
     const user_id = req.user.user_id;
-    if (typeof req.query.all != "undefined") {
+    const all_seat = req.query.all;
+    if (typeof all_seat == "undefined") {
         res.status(400).json({ data: '', message: 'Missing param!' });
         return next();
     }
 
-    if (req.query.all == 1 || req.query.all == 0) {
+    if (all_seat == 1 || all_seat == 0) {
         const timer_update = 'UPDATE Users SET timer = NOW() WHERE user_id = ?';
         const timer_query = mysql.format(timer_update, [user_id]);
         const rsSeat = 'SELECT * FROM Seat_Reservation WHERE screening_id = ?';
