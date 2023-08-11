@@ -20,7 +20,10 @@ const { ALL } = require('dns');
 const app = express();
 app.use(express.json());
 app.use(cookieParser());
-app.use(cors());
+app.use(cors({
+        credentials: true,
+        origin: 'http://localhost:3000'
+    }));
 
 //test function
 app.get('/test', (req, res) => {
@@ -442,7 +445,7 @@ app.get('/seatLayout', getToken.tokenExist, getToken.validateToken, async (req, 
         const timer_query = mysql.format(timer_update, [user_id]);
         const rsSeat = 'SELECT * FROM Seat_Reservation WHERE screening_id = ?';
         const rsSeat_query = mysql.format(rsSeat, [screening_id]);
-        const allSeat = 'SELECT seat_id, row, number FROM Seat s INNER JOIN Screening sc ON s.room_id = sc.room_id WHERE sc.screening_id = ?';
+        const allSeat = 'SELECT seat_id, row, number, vip FROM Seat s INNER JOIN Screening sc ON s.room_id = sc.room_id WHERE sc.screening_id = ?';
         const allSeat_query = mysql.format(allSeat, [screening_id]);
 
         await db_conn.pool.getConnection(async (err, conn) => {
@@ -477,10 +480,8 @@ app.get('/seatLayout', getToken.tokenExist, getToken.validateToken, async (req, 
 app.post('/booking', getToken.tokenExist, getToken.validateToken, async (req, res, next) => { //parameter: screening_id, seat_id
     const user_id = req.user.user_id;
     const screening_id = req.body.screening_id;
-    let seat_id = req.body.seat_id;
-    if (typeof seat_id == "string") {
-        seat_id = req.body.seat_id.split(",");
-    } else {
+    const seat_id = req.body.seat_id;
+    if (typeof seat_id != "object") {
         res.status(400).json({ data: '', message: 'Wrong seat_id format!' });
         return next();
     }
