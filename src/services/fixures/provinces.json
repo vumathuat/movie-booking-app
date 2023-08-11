@@ -5,19 +5,19 @@
     },
     {
         "id": 2,
-        "name": "Ho Chi Minh City"
+        "name": "Hồ Chí Minh City"
     },
     {
         "id": 3,
-        "name": "Da Nang"
+        "name": "Đà Nẵng"
     },
     {
         "id": 4,
-        "name": "Binh Duong"
+        "name": "Bình Dương"
     },
     {
         "id": 5,
-        "name": "Soc Trang"
+        "name": "Sóc Trăng"
     },
     {
         "id": 6,
@@ -25,22 +25,22 @@
     },
     {
         "id": 7,
-        "name": "Quang Binh"
+        "name": "Quảng Bình"
     },
     {
         "id": 8,
-        "name": "Quang Tri"
+        "name": "Quảng Trị"
     },
     {
         "id": 9,
-        "name": "Tra Vinh"
+        "name": "Trà Vinh"
     },
     {
         "id": 10,
-        "name": "Hau Giang"
+        "name": "Thanh Hóa"
     },
     {
         "id": 11,
-        "name": "Son La"
+        "name": "Sơn La"
     }
 ]

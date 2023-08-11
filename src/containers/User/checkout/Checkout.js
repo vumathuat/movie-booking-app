@@ -8,8 +8,10 @@ import Loader from '../../../components/User/Loader';
 export default function Checkout(props) {
     const [isLoading, setIsLoading] = useState(true);
     const [chosenMovie, setchosenMovie] = useState({});
+    const [schedule, setSchedule] = useState([]);
     const [step, setStep] = useState(1);
     const [numOfSeats, setNumOfSeats] = useState({});
+    console.log(props.history)
 
     const nextStep = (step, numOfSeats) => {
         setNumOfSeats(numOfSeats);
@@ -19,20 +21,41 @@ export default function Checkout(props) {
     const backStep = () => {
         setStep(1);
     };
+
+    let screening = window.localStorage.getItem('SCREENING');
+    const renderSchedule = () => {
+        return schedule
+        .filter(
+            (item) =>
+                item.screening_id == screening
+        ).map((item, index) => {
+            return (
+                <p className='cinema__time'
+                key={index}>
+                    Watch date: {item.time_start_d} 
+                    <br></br>
+                    Showtime: {item.time_start_t} 
+                </p>
+              );
+        });
+    }
+    
     const id = props.match.params.id;
     useEffect(() => {
-        Axios({
-            method: 'GET',
-            url: `https://movie0706.cybersoft.edu.vn/api/QuanLyDatVe/LayDanhSachPhongVe?MaLichChieu=${id}`,
-        })
-            .then((result) => {
-                setchosenMovie(result.data);
+        const fetchMovieDetails = async () => {
+            const id = props.match.params.id;
+            try {
+                const response = await Axios.get(`http://localhost:5000/films?id=${id}`);
+                setchosenMovie(response.data[0]);
                 setIsLoading(false);
-            })
-            .catch((err) => {
-                console.log(err);
-            });
-    }, []); 
+                const result = await Axios.get(`http://localhost:5000/schedule?id=${id}`);
+                setSchedule(result.data);
+            } catch (error) {
+                console.log(error);
+            }
+        };
+        fetchMovieDetails();
+    }, [props.match.params.id]);
 
     const renderStepPage = () => {
         switch (step) {
@@ -43,7 +66,10 @@ export default function Checkout(props) {
                         history={props.history}
                         prePage={props.history.location.prePage}
                         chosenMovie={chosenMovie}
+                        schedule={schedule}
                         nextStep={nextStep}
+                        renderSchedule={renderSchedule}
+                        
                     />
                 );
             case 2:
@@ -54,6 +80,8 @@ export default function Checkout(props) {
                         backStep={backStep}
                         chosenMovie={chosenMovie}
                         numOfSeats={numOfSeats}
+                        schedule={schedule}
+                        renderSchedule={renderSchedule}
                     />
                 );
             case 3:

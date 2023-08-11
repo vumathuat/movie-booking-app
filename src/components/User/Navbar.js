@@ -58,23 +58,15 @@ export default function Navbar(props) {
                         aria-expanded='false'
                     >
                         <Avatar className={classes.small}>
-                            {user.hoTen.slice(0, 1).toUpperCase()}
                         </Avatar>
                         <span className='ml-2'>
-                            {user.hoTen.trim().split(' ').pop()}
+                            User{user.username}
                         </span>
                     </a>
                     <div
                         className='dropdown-menu'
                         aria-labelledby='navbarDropdown'
                     >
-                        <a
-                            href='# '
-                            className='dropdown-item'
-                            style={{ cursor: 'pointer' }}
-                        >
-                            User info
-                        </a>
                         <a
                             href='# '
                             className='dropdown-item'
@@ -154,7 +146,7 @@ export default function Navbar(props) {
                             href=''
                             onClick={toggleDrawer(side, false)}
                         >
-                            Movie Schedule
+                            Book Ticket
                         </Link>
                     ) : (
                         <NavLink
@@ -163,33 +155,7 @@ export default function Navbar(props) {
                             exact
                             to='/home-list-movie'
                         >
-                            Movie Schedule
-                        </NavLink>
-                    )}
-                </ListItem>
-                <ListItem button className='p-0'>
-                    {checkLinkToScroll() ? (
-                        <Link
-                            className='nav__link'
-                            activeClass='active'
-                            to='group-cinema--mobile'
-                            spy={true}
-                            smooth={true}
-                            offset={-75}
-                            duration={500}
-                            href=''
-                            onClick={toggleDrawer(side, false)}
-                        >
-                            Cinema Group
-                        </Link>
-                    ) : (
-                        <NavLink
-                            className='nav__link'
-                            activeClassName='active'
-                            exact
-                            to='/home-group-cinema'
-                        >
-                            Cinema Group
+                            Book Ticket
                         </NavLink>
                     )}
                 </ListItem>
@@ -201,7 +167,7 @@ export default function Navbar(props) {
                             to='app'
                             spy={true}
                             smooth={true}
-                            offset={-60}
+                            offset={-120}
                             duration={500}
                             href=''
                             onClick={toggleDrawer(side, false)}
@@ -283,11 +249,11 @@ export default function Navbar(props) {
                                         to='list-movie__wrap'
                                         spy={true}
                                         smooth={true}
-                                        offset={-75}
+                                        offset={-140}
                                         duration={500}
                                         href=''
                                     >
-                                        Movie Schedule
+                                        Book ticket
                                     </Link>
                                 ) : (
                                     <NavLink
@@ -296,32 +262,7 @@ export default function Navbar(props) {
                                         className='nav__link'
                                         to='/home-list-movie'
                                     >
-                                        Movie Schedule
-                                    </NavLink>
-                                )}
-                            </li>
-                            <li className='nav__item'>
-                                {checkLinkToScroll() ? (
-                                    <Link
-                                        className='nav__link'
-                                        activeClass='active'
-                                        to='cinema__wrap'
-                                        spy={true}
-                                        smooth={true}
-                                        offset={-75}
-                                        duration={500}
-                                        href=''
-                                    >
-                                        Cinema Group
-                                    </Link>
-                                ) : (
-                                    <NavLink
-                                        activeClassName='active'
-                                        exact
-                                        className='nav__link'
-                                        to='/home-group-cinema'
-                                    >
-                                        Cinema Group
+                                        Book ticket
                                     </NavLink>
                                 )}
                             </li>
@@ -333,7 +274,7 @@ export default function Navbar(props) {
                                         to='app'
                                         spy={true}
                                         smooth={true}
-                                        offset={-60}
+                                        offset={-120}
                                         duration={500}
                                         href=''
                                     >

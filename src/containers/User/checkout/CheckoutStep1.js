@@ -3,27 +3,23 @@ import cancel from '../../../assets/img/cancel-arrow.png';
 import back from '../../../assets/img/back.png';
 export default function CheckoutStep1(props) {
     const typeSeat = [
-        ...new Set(props.chosenMovie.danhSachGhe.map((item) => item.loaiGhe)),
+        props.chosenMovie.seat_price, props.chosenMovie.VIP_price,
     ];
 
     const initialSeat = [];
 
     typeSeat.forEach(function (element, index) {
-        if (element === 'Thuong') {
+        if (element === 80000) {
             initialSeat.push({
-                type: element,
+                type: " Normal",
                 num: 2,
-                price: props.chosenMovie.danhSachGhe.find(
-                    (item1) => item1.loaiGhe === element
-                ).giaVe,
+                price: 80000,
             });
         } else {
             initialSeat.push({
-                type: element,
+                type: " VIP",
                 num: 0,
-                price: props.chosenMovie.danhSachGhe.find(
-                    (item1) => item1.loaiGhe === element
-                ).giaVe,
+                price: 100000,
             });
         }
     });
@@ -63,7 +59,7 @@ export default function CheckoutStep1(props) {
                     <div className='ticket__type col-7 col-md-4 p-0'>
                         <span>
                             Ticket 
-                            {numOfSeats[key].type === 'Thuong'
+                            {numOfSeats[key].type === 'Normal'
                                 ? 'Normal'
                                 : numOfSeats[key].type}
                         </span>
@@ -91,14 +87,6 @@ export default function CheckoutStep1(props) {
         return ticketArray;
     };
 
-    let tenRap = props.chosenMovie.thongTinPhim.tenCumRap.startsWith('BHD Star')
-        ? [
-              props.chosenMovie.thongTinPhim.tenCumRap.slice(0, 18),
-              props.chosenMovie.thongTinPhim.tenCumRap.slice(20),
-          ]
-        : props.chosenMovie.thongTinPhim.tenCumRap.split(' - ');
-
-    //Main return
     return (
         <>
             <div className='step-checkout--mobile'>
@@ -115,7 +103,7 @@ export default function CheckoutStep1(props) {
             <div
                 className='checkout__top--mobile'
                 style={{
-                    background: `url(${props.chosenMovie.thongTinPhim.hinhAnh}) no-repeat center`,
+                    background: `url(${props.chosenMovie.poster}) no-repeat center`,
                     backgroundSize: 'cover',
                 }}
             >
@@ -123,9 +111,9 @@ export default function CheckoutStep1(props) {
                     <div className='detail-movie__info'>
                         <p className='ten-phim'>
                             <span className='age-type'>C13</span>
-                            {props.chosenMovie.thongTinPhim.tenPhim}
+                            {props.chosenMovie.title}
                         </p>
-                        <p className='time'>120 minutes - 8.7 IMDb - 2D/Digital</p>
+                        <p className='time'>{props.chosenMovie.duration} minutes - {props.chosenMovie.rating} IMDb - 2D/Digital</p>
                     </div>
                 </div>
             </div>
@@ -133,7 +121,7 @@ export default function CheckoutStep1(props) {
                 <div
                     className='checkout__left col-3 p-0'
                     style={{
-                        background: `url(${props.chosenMovie.thongTinPhim.hinhAnh}) no-repeat center`,
+                        background: `url(${props.chosenMovie.poster}) no-repeat center`,
                         backgroundSize: 'cover',
                     }}
                 >
@@ -142,15 +130,15 @@ export default function CheckoutStep1(props) {
                             <img src={back} alt='back-arrow' />
                         </div>
                         <div className='detail-movie__info'>
-                            <p className='ngay-chieu'>
-                                {props.chosenMovie.thongTinPhim.ngayChieu}
-                            </p>
                             <p className='ten-phim'>
                                 <span className='age-type'>C13</span>
-                                {props.chosenMovie.thongTinPhim.tenPhim}
+                                {props.chosenMovie.title}
+                            </p>
+                            <p className='ngay-chieu'>
+                                Director: {props.chosenMovie.director}
                             </p>
                             <p className='time'>
-                                120 minutes - 8.7 IMDb - 2D/Digital
+                                {props.chosenMovie.duration} minutes - {props.chosenMovie.rating} IMDb - 2D/Digital
                             </p>
                         </div>
                     </div>
@@ -159,17 +147,7 @@ export default function CheckoutStep1(props) {
                     <div className='cinema'>
                         <div className='cinema__logo'></div>
                         <div className='cinema__info'>
-                            <p className='cinema__name'>
-                                <span className='cinema__name__group'>
-                                    {tenRap[0]}
-                                </span>
-                                - {tenRap[1]}
-                            </p>
-                            <p className='cinema__time'>
-                                {props.chosenMovie.thongTinPhim.ngayChieu} -
-                                {props.chosenMovie.thongTinPhim.gioChieu} -
-                                {props.chosenMovie.thongTinPhim.tenRap}
-                            </p>
+                            {props.renderSchedule()}
                         </div>
                     </div>
                     <div className='tickets'>{renderTicket()}</div>
@@ -214,7 +192,7 @@ export default function CheckoutStep1(props) {
                             </div>
                             <div>
                                 <span className='hotline__phone'>
-                                    1900 545 436
+                                    &nbsp; 1900 545 436
                                 </span>
                             </div>
                         </div>

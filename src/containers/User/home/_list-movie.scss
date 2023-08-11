@@ -1,6 +1,6 @@
 .list-movie__wrap {
   position: relative;
-  margin: 75px 100px 0 100px;
+  margin: 75px 50px 0 50px;
   @include mediaQueryMax("extra-large") {
     margin: 75px 100px 0 100px;
   }
@@ -97,7 +97,6 @@
     padding: 0 10px;
   }
   .movie__img {
-    height: 276px;
     border-radius: 4px;
     overflow: hidden;
     img {

@@ -1,17 +1,15 @@
 import React, { useRef, useEffect } from 'react';
 import Carousel from './home/Carousel';
 import ListMovie from './home/ListMovie';
-import Cinema from './home/Cinema';
 import App from './home/App';
 import Footer from './home/Footer';
 import Loader from '../../components/User/Loader';
 
 const scrollToRef = (ref) =>
-    window.scrollTo({ top: ref.current.offsetTop - 60, behavior: 'smooth' });
+    window.scrollTo({ top: ref.current.offsetTop - 20, behavior: 'smooth' });
 
 export default function Home(props) {
     const listMovie = useRef(null);
-    const groupCinema = useRef(null);
     const app = useRef(null);
 
     useEffect(() => {
@@ -25,9 +23,6 @@ export default function Home(props) {
                 case 'listMovie':
                     scrollToRef(listMovie);
                     break;
-                case 'groupCinema':
-                    scrollToRef(groupCinema);
-                    break;
                 case 'app':
                     scrollToRef(app);
                     break;
@@ -35,21 +30,19 @@ export default function Home(props) {
                     break;
             }
         }, 500);
-    }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [props.scroll]); 
 
     return (
         <>
             <Carousel history={props.history}></Carousel>
+
             <div ref={listMovie} className='container'>
                 <ListMovie></ListMovie>
-            </div>
-            <div ref={groupCinema}>
-                <Cinema history={props.history}></Cinema>
             </div>
             <div ref={app}>
                 <App></App>
             </div>
-            <Footer />
+            <Footer></Footer>
             <Loader />
         </>
     );

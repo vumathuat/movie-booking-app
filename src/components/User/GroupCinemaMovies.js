@@ -1,5 +1,4 @@
-import React, { useEffect } from 'react';
-import { connect } from 'react-redux';
+import React, { useEffect, useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { withStyles } from '@material-ui/core/styles';
 import { makeStyles } from '@material-ui/core/styles';
@@ -15,14 +14,13 @@ const useStyles = makeStyles((theme) => ({
     root: {
         flexGrow: 1,
         width: '0',
-        // backgroundColor: theme.palette.background.paper
     },
     tab: {
         minWidth: '95px',
     },
-    // expansionPanel: {
-    //   width: "100%"
-    // }
+    expansionPanel: {
+      width: "100%"
+    }
 }));
 
 const ExpansionPanel = withStyles({
@@ -82,7 +80,7 @@ function GroupCinemaMovies(props) {
     //Material UI Tabs
     const [value, setValue] = React.useState(0);
     //Set ChosenDay
-    const [chosenDay, setChosenDay] = React.useState('2019-01-01');
+    const [chosenDay, setChosenDay] = React.useState('2023-01-01');
     //Return Time-end with Time-start
     const getTimeEnd = (timeStart) => {
         let d = new Date();
@@ -99,7 +97,7 @@ function GroupCinemaMovies(props) {
 
     //Material UI Tab change
     const handleChange = (event, newValue) => {
-        let baseDay = new Date('January 1, 2023');
+        let baseDay = new Date();
         let currentDay = new Date(baseDay);
         currentDay.setDate(baseDay.getDate() + newValue);
         let month =
@@ -118,17 +116,17 @@ function GroupCinemaMovies(props) {
 
     const renderTab = () => {
         let dayName = [
-            'Sunday',
-            ' Monday',
-            ' Tuesday',
-            ' Wednesday',
-            ' Thursday',
-            ' Friday',
-            ' Saturday',
+            'Chủ nhật',
+            ' Thứ 2',
+            ' Thứ 3',
+            ' Thứ 4',
+            ' Thứ 5',
+            ' Thứ 6',
+            ' Thứ 7',
         ];
         //Create Tabs with 14 days
         let arrayTab = [...Array(14)].map((item, index) => {
-            let day = new Date('January 1, 2019');
+            let day = new Date();
             let nextDay = new Date(day);
             nextDay.setDate(day.getDate() + index);
             return (
@@ -147,121 +145,62 @@ function GroupCinemaMovies(props) {
         return arrayTab;
     };
 
-    //Render Cinemas of ChosenGroupCinema have showtime on ChosenDay
-    const renderCinemas = () => {
-        let todayCinemas = [];
-        if (props.groupCinemaInfo[props.chosenGroupCinema]) {
-            props.groupCinemaInfo[props.chosenGroupCinema].forEach((cinema) => {
-                if (
-                    props.detailMovie.lichChieu
-                        .filter(
-                            (lichChieu) =>
-                                lichChieu.ngayChieuGioChieu.slice(0, 10) ===
-                                chosenDay
-                        )
-                        .find(
-                            (lichChieu) =>
-                                lichChieu.thongTinRap.maCumRap ===
-                                cinema.maCumRap
-                        )
-                ) {
-                    todayCinemas.push(cinema);
-                }
-            });
-        }
-
-        if (todayCinemas.length > 0) {
-            return todayCinemas.map((cinema, index) => {
-                let tenRap = cinema.tenCumRap.startsWith('BHD Star')
-                    ? [
-                          cinema.tenCumRap.slice(0, 18),
-                          cinema.tenCumRap.slice(20),
-                      ]
-                    : cinema.tenCumRap.split(' - ');
-                return (
-                    <ExpansionPanel key={index}>
-                        <ExpansionPanelSummary
-                            // expandIcon={<ExpandMoreIcon />}
-                            aria-controls={`todayCinemas-content-${index}`}
-                            id={`todayCinemas-header-${index}`}
-                        >
-                            <div className='cinema'>
-                                <div className='cinema__info'>
-                                    <span className='cinema__name'>
-                                        <span className='group-cinema__name'>
-                                            {tenRap[0]}
-                                        </span>
-                                        - {tenRap[1]}
-                                    </span>
-                                    <span className='cinema__address'>
-                                        {cinema.diaChi}
-                                    </span>
-                                    <span className='cinema__detail'>
-                                        [detail]
-                                    </span>
-                                </div>
-                            </div>
-                        </ExpansionPanelSummary>
-                        <ExpansionPanelDetails>
-                            <Typography>
-                                {props.detailMovie.lichChieu
-                                    .filter(
-                                        (lichChieu) =>
-                                            lichChieu.thongTinRap.maCumRap ===
-                                            cinema.maCumRap
-                                    )
-                                    .filter(
-                                        (lichChieu) =>
-                                            lichChieu.ngayChieuGioChieu.slice(
-                                                0,
-                                                10
-                                            ) === chosenDay
-                                    )
-                                    .map((lichChieu, index4) => {
-                                        return (
-                                            <NavLink
-                                                className='showtime'
-                                                to={{
-                                                    pathname:
-                                                        localStorage.getItem(
-                                                            'User'
-                                                        )
-                                                            ? `/checkout/${lichChieu.maLichChieu}`
-                                                            : `/login`,
-                                                    preRequire: `/checkout/${lichChieu.maLichChieu}`,
-                                                    prePage:
-                                                        props.history.location
-                                                            .pathname,
-                                                }}
-                                                key={index4}
-                                            >
-                                                <span className='start-time'>
-                                                    {lichChieu.ngayChieuGioChieu.slice(
-                                                        11,
-                                                        16
-                                                    )}
-                                                </span>
-                                                <span>
-                                                    {` ~ ${getTimeEnd(
-                                                        lichChieu.ngayChieuGioChieu.slice(
-                                                            11,
-                                                            16
-                                                        )
-                                                    )}`}
-                                                </span>
-                                            </NavLink>
-                                        );
-                                    })}
-                            </Typography>
-                        </ExpansionPanelDetails>
-                    </ExpansionPanel>
-                );
-            });
-        }
+    const renderSchedule = () => {
         return (
-            <div className='no-showtime'>
-                <span>There is no watch slot left.</span>
-            </div>
+            <ExpansionPanel>
+                <ExpansionPanelSummary>
+                    <div className='cinema'>
+                        <div className='cinema__info'>
+                            <span className='cinema__name'>
+                                <span className='group-cinema__name'>
+                                    {props.detailMovie.title} 
+                                </span>
+                                &nbsp;- {props.detailMovie.release_date}
+                            </span>
+                        </div>
+                    </div>
+                </ExpansionPanelSummary>
+                <ExpansionPanelDetails>
+                    <Typography>
+                        {props.schedule
+                            .filter(
+                                (item) =>
+                                    item.time_start_d === chosenDay
+                            )
+                            .map((item, index4) => {
+                                window.localStorage.setItem('SCREENING', item.screening_id);
+                                return (
+                                    <NavLink
+                                        className='showtime'
+                                        to={{
+                                            pathname:
+                                                localStorage.getItem(
+                                                    'User'
+                                                )
+                                                    ? `/checkout/${item.movie_id}`
+                                                    : `/login`,
+                                            preRequire: `/checkout/${item.movie_id}`,
+                                            prePage:
+                                                props.history.location
+                                                    .pathname,
+                                        }}
+                                        key={index4}
+                                    >
+                                        <span className='timestart'>
+                                            {item.time_start_t}
+                                        </span>
+                                        <span>
+                                            {` ~ ${getTimeEnd(
+                                                item.time_start_t
+                                            )}`}
+                                        </span>
+                                    </NavLink>
+                                );
+                            }
+                            )}
+                    </Typography>
+                </ExpansionPanelDetails>
+            </ExpansionPanel>
         );
     };
 
@@ -281,17 +220,9 @@ function GroupCinemaMovies(props) {
                     {renderTab()}
                 </Tabs>
             </AppBar>
-            {renderCinemas()}
+            {renderSchedule()}
         </div>
     );
 }
 
-const mapStateToProps = (state) => {
-    return {
-        groupCinemaShowtimes:
-            state.cinemaReducer.groupCinemaShowtimes.chosenGroupCinema,
-        chosenGroupCinema: state.cinemaReducer.chosenGroupCinema,
-        groupCinemaInfo: state.cinemaReducer.groupCinemaInfo,
-    };
-};
-export default connect(mapStateToProps, null)(GroupCinemaMovies);
+export default GroupCinemaMovies;

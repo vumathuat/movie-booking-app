@@ -18,8 +18,8 @@ export default function Movie(props) {
       >
         <Modal.Body>
           <iframe
-            title={movie.biDanh}
-            src={movie.trailer}
+            title={movie.title}
+            src= {movie.trailer}
             frameborder="0"
             allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
             allowfullscreen
@@ -37,15 +37,14 @@ export default function Movie(props) {
           <div className="movie-img">
             <div className="movie-img__img">
               <img
-                src={movie.hinhAnh}
+                src = {movie.poster}
                 alt="movie-alt"
                 onError={e => {
                   e.target.onerror = null;
-                  e.target.src = "/img/firm-0.webp";
                 }}
               />
             </div>
-            <NavLink to={`/detail-movie/${movie.maPhim}`}>
+            <NavLink to={`/detail-movie/${movie.movie_id}`}>
               <div className="movie-img__overlay"></div>
             </NavLink>
             <div className="movie__play">
@@ -58,11 +57,11 @@ export default function Movie(props) {
           </div>
           <div className="movie-info">
             <div className="info">
-              <div className="name-movie">{movie.tenPhim}</div>
-              <div className="info-movie">103 minutes - 7.3 IMDb</div>
+              <div className="name-movie">{movie.title}</div>
+              <div className="info-movie">{movie.duration} minutes - {movie.rating} IMDb</div>
             </div>
             <div className="book-ticket">
-              <NavLink to={`/detail-movie/${movie.maPhim}`}>
+              <NavLink to={`/detail-movie/${movie.movie_id}`}>
                 <span>MUA VÉ</span>
               </NavLink>
             </div>

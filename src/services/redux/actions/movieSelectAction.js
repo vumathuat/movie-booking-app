@@ -5,7 +5,7 @@ export const getShowtimeInfoAPI = (id) => {
     return (dispatch) => {
         Axios({
             method: 'GET',
-            url: `https://movie0706.cybersoft.edu.vn/api/QuanLyRap/LayThongTinLichChieuPhim?MaPhim=${id}`,
+            url: `http://localhost:5000/schedule?id=${id}`,
         })
             .then((result) => {
                 dispatch({

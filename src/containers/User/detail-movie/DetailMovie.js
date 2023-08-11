@@ -1,16 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { connect } from 'react-redux';
 import Axios from 'axios';
-import * as cinemaActions from '../../../services/redux/actions/cinemaActions';
-
 import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
-
-import GroupCinemaMoviesMobile from '../../../components/User/GroupCinemaMoviesMobile';
-import CategoryGroupCinema from './../../../components/User/CategoryGroupCinema';
-import GroupCinemaMovies from '../../../components/User/GroupCinemaMovies';
 import Footer from './../home/Footer';
 import Loader from '../../../components/User/Loader';
-
+import GroupCinemaMovies from '../../../components/User/GroupCinemaMovies';
 import { createTheme } from '@material-ui/core/styles';
 import { ThemeProvider } from '@material-ui/styles';
 import { makeStyles } from '@material-ui/core/styles';
@@ -71,7 +64,25 @@ function DetailMovie(props) {
     const [modalShow, setModalShow] = useState(false);
 
     const [isLoading, setIsLoading] = useState(false);
-    const [detailMovie, setDetailMovie] = useState({});
+    const [detailMovie, setDetailMovie] = useState([]);
+    const [schedule, setSchedule] = useState([]);
+
+    useEffect(() => {
+        const fetchMovieDetails = async () => {
+            const id = props.match.params.id;
+            try {
+                const response = await Axios.get(`http://localhost:5000/films?id=${id}`);
+                setDetailMovie(response.data[0]);
+                setIsLoading(true);
+                const result = await Axios.get(`http://localhost:5000/schedule?id=${id}`);
+                setSchedule(result.data);
+            } catch (error) {
+                console.log(error);
+            }
+        };
+        fetchMovieDetails();
+    }, [props.match.params.id]);
+
     function VideoModal(props) {
         return (
             <Modal
@@ -83,9 +94,8 @@ function DetailMovie(props) {
             >
                 <Modal.Body>
                     <iframe
-                        title={detailMovie.biDanh}
+                        title={detailMovie.title}
                         src={detailMovie.trailer}
-                        frameBorder='0'
                         allow='accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture'
                         allowFullScreen
                     ></iframe>
@@ -93,9 +103,10 @@ function DetailMovie(props) {
             </Modal>
         );
     }
+
     const starRate = () => {
-        if (detailMovie.danhGia) {
-            let rate = detailMovie.danhGia;
+        if (detailMovie.rating) {
+            let rate = detailMovie.rating;
             let stars = [];
             for (let index = 0; index < 10; index += 2) {
                 if (rate >= 2) {
@@ -114,41 +125,12 @@ function DetailMovie(props) {
                             aria-hidden='true'
                         />
                     );
-                } else
-                    stars.push(
-                        <i
-                            key={index}
-                            className='fa fa-star-o'
-                            aria-hidden='true'
-                        ></i>
-                    );
+                }
                 rate -= 2;
             }
             return stars;
         }
     };
-
-    props.listGroupCinema.forEach((groupCinema) =>
-        props.getGroupCinemaInfo(groupCinema.maHeThongRap)
-    );
-
-    useEffect(() => {
-        let { getListGroupCinema } = props;
-        const id = props.match.params.id;
-        getListGroupCinema();
-        Axios({
-            method: 'GET',
-            url: `http://movie0706.cybersoft.edu.vn/api/QuanLyPhim/LayThongTinPhim?MaPhim=${id}`,
-        })
-            .then((result) => {
-                setDetailMovie(result.data);
-                setIsLoading(true);
-            })
-            .catch((err) => {
-                console.log(err);
-            });
-    }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
     if (isLoading) {
         return (
             <ThemeProvider theme={theme}>
@@ -158,7 +140,7 @@ function DetailMovie(props) {
                 />
                 <div className='detail-movie__wrap'>
                     <div className='detail-movie__background'>
-                        <img src={detailMovie.hinhAnh} alt='background-movie' />
+                        <img src={detailMovie.poster} alt='background-movie' />
                         <div className='detail-movie__gradient'>
                             <div className='movie__play'>
                                 <i
@@ -170,7 +152,7 @@ function DetailMovie(props) {
                         </div>
                         <div className='detail-movie__rate--small'>
                             <span className='avgPoint'>
-                                {detailMovie.danhGia}
+                                {detailMovie.rating}
                             </span>
                             <div className='starRate'>{starRate()}</div>
                         </div>
@@ -180,7 +162,7 @@ function DetailMovie(props) {
                             <div className='detail-movie__poster col-3 p-lg-0'>
                                 <img
                                     className='img-fluid'
-                                    src={detailMovie.hinhAnh}
+                                    src={detailMovie.poster}
                                     alt=''
                                 />
                                 <div className='movie__play'>
@@ -194,15 +176,15 @@ function DetailMovie(props) {
                             <div className='detail-movie__info col-6'>
                                 <div>
                                     <p>
-                                        {detailMovie.ngayKhoiChieu.slice(0, 10)}
+                                        {detailMovie.release_date}
                                     </p>
                                     <p className='tenPhim'>
                                         <span className='age-type'>C13</span>
-                                        {detailMovie.tenPhim}
+                                        {detailMovie.title}
                                     </p>
-                                    <p>120 phút - 8.7 IMDb - 2D/Digital</p>
+                                    <p>{detailMovie.duration} minutes - {detailMovie.rating} IMDb - 2D/Digital</p>
                                     <button className='book-ticket'>
-                                        Mua vé
+                                        Book Ticket
                                     </button>
                                 </div>
                             </div>
@@ -217,8 +199,8 @@ function DetailMovie(props) {
                                     >
                                         <CircularProgressbar
                                             background={true}
-                                            value={detailMovie.danhGia}
-                                            text={detailMovie.danhGia}
+                                            value={detailMovie.rating}
+                                            text={detailMovie.rating}
                                             maxValue={10}
                                             strokeWidth={6}
                                             styles={buildStyles({
@@ -234,7 +216,7 @@ function DetailMovie(props) {
                                     </div>
                                     <div className='starRate'>{starRate()}</div>
                                     <div className='numberOfReviews'>
-                                        <span>6 người đánh giá</span>
+                                        <span>356 people has rated this films</span>
                                     </div>
                                 </div>
                             </div>
@@ -244,12 +226,12 @@ function DetailMovie(props) {
                 <div className='detail-movie__bottom'>
                     <div className='detail-movie__info--mobile'>
                         <div>
-                            <p>{detailMovie.ngayKhoiChieu}</p>
+                            <p>{detailMovie.release_date}</p>
                             <p className='tenPhim'>
                                 <span>C13 - </span>
-                                {detailMovie.tenPhim}
+                                {detailMovie.title}
                             </p>
-                            <p>120 phút - 8.7 IMDb - 2D/Digital</p>
+                            <p>{detailMovie.duration} minutes - {detailMovie.rating} IMDb - 2D/Digital</p>
                         </div>
                     </div>
                     <div className='detail-movie__bottom--translate'>
@@ -268,7 +250,7 @@ function DetailMovie(props) {
                                     aria-controls='showtime'
                                     aria-selected='true'
                                 >
-                                    Lịch Chiếu
+                                    Schedule
                                 </a>
                             </li>
                             <li className='nav-item'>
@@ -281,20 +263,7 @@ function DetailMovie(props) {
                                     aria-controls='info'
                                     aria-selected='false'
                                 >
-                                    Thông Tin
-                                </a>
-                            </li>
-                            <li className='nav-item'>
-                                <a
-                                    className='nav-link'
-                                    id='rate-tab'
-                                    data-toggle='tab'
-                                    href='#rate'
-                                    role='tab'
-                                    aria-controls='rate'
-                                    aria-selected='false'
-                                >
-                                    Đánh giá
+                                   Information
                                 </a>
                             </li>
                         </ul>
@@ -308,16 +277,12 @@ function DetailMovie(props) {
                                 <Paper
                                     className={`MuiTab d-none d-md-flex ${classes.root}`}
                                 >
-                                    <CategoryGroupCinema labelWithName={true} />
                                     <GroupCinemaMovies
                                         history={props.history}
                                         detailMovie={detailMovie}
+                                        schedule={schedule}
                                     />
                                 </Paper>
-                                <GroupCinemaMoviesMobile
-                                    history={props.history}
-                                    detailMovie={detailMovie}
-                                />
                             </div>
                             <div
                                 className='tab-pane fade'
@@ -330,55 +295,55 @@ function DetailMovie(props) {
                                         <div className='row m-0'>
                                             <div className='col-5'>
                                                 <p className='title'>
-                                                    Ngày phát hành
+                                                    Release date
                                                 </p>
                                             </div>
                                             <div className='col-7'>
                                                 <p className='content'>
-                                                    04.10.2019
+                                                    {detailMovie.release_date}
                                                 </p>
                                             </div>
                                         </div>
                                         <div className='row m-0'>
                                             <div className='col-5'>
                                                 <p className='title'>
-                                                    Đạo diễn
+                                                    Director
                                                 </p>
                                             </div>
                                             <div className='col-7'>
                                                 <p className='content'>
-                                                    Todd Phillips
+                                                    {detailMovie.director}
                                                 </p>
                                             </div>
                                         </div>
                                         <div className='row m-0'>
                                             <div className='col-5'>
                                                 <p className='title'>
-                                                    Diễn viên
+                                                    Cast
                                                 </p>
                                             </div>
                                             <div className='col-7'>
                                                 <p className='content'>
-                                                    Zazie Beetz, Joaquin Phoenix
+                                                    {detailMovie.cast}
                                                 </p>
                                             </div>
                                         </div>
                                         <div className='row m-0'>
                                             <div className='col-5'>
                                                 <p className='title'>
-                                                    Thể Loại
+                                                    Genre
                                                 </p>
                                             </div>
                                             <div className='col-7'>
                                                 <p className='content'>
-                                                    Hành động, Tội phạm
+                                                    {detailMovie.genre}
                                                 </p>
                                             </div>
                                         </div>
                                         <div className='row m-0'>
                                             <div className='col-5'>
                                                 <p className='title'>
-                                                    Định dạng
+                                                    Format
                                                 </p>
                                             </div>
                                             <div className='col-7'>
@@ -390,29 +355,21 @@ function DetailMovie(props) {
                                         <div className='row m-0'>
                                             <div className='col-5'>
                                                 <p className='title'>
-                                                    Quốc Gia SX
+                                                    Subtitle
                                                 </p>
                                             </div>
                                             <div className='col-7'>
-                                                <p className='content'>Mỹ</p>
+                                                <p className='content'>{detailMovie.language}</p>
                                             </div>
                                         </div>
                                     </div>
                                     <div className='col-sm-6'>
-                                        <p className='title'>Nội dung</p>
+                                        <p className='title'>Description</p>
                                         <p className='content info-full'>
-                                            {detailMovie.moTa}
+                                            {detailMovie.description}
                                         </p>
                                     </div>
                                 </div>
-                            </div>
-                            <div
-                                className='tab-pane fade'
-                                id='rate'
-                                role='tabpanel'
-                                aria-labelledby='rate-tab'
-                            >
-                                ...
                             </div>
                         </div>
                     </div>
@@ -423,20 +380,5 @@ function DetailMovie(props) {
     }
     return <Loader />;
 }
-
-const mapDispathToProp = (dispatch) => {
-    return {
-        getListGroupCinema: () => {
-            dispatch(cinemaActions.getListGroupCinemaAPI());
-        },
-        getGroupCinemaInfo: (meHeThongRap) => {
-            dispatch(cinemaActions.getGroupCinemaInfoAPI(meHeThongRap));
-        },
-    };
-};
-const mapStateToProps = (state) => {
-    return {
-        listGroupCinema: state.cinemaReducer.listGroupCinema,
-    };
-};
-export default connect(mapStateToProps, mapDispathToProp)(DetailMovie);
+  
+export default DetailMovie;

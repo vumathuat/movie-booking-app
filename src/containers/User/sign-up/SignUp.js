@@ -11,10 +11,9 @@ import webLogo from '../../../assets/img/web-logo.png';
 import * as yup from 'yup';
 
 const signupUserSchema = yup.object().shape({
-    taiKhoan: yup.string().required('* Field is required!'),
-    matKhau: yup.string().required('* Field is required!'),
-    hoTen: yup.string().required('* Field is required!'),
-    soDt: yup
+    username: yup.string().required('* Field is required!'),
+    password: yup.string().required('* Field is required!'),
+    phone_no: yup
         .string()
         .required('*Field is required!')
         .matches(
@@ -23,8 +22,7 @@ const signupUserSchema = yup.object().shape({
         ),
     email: yup
         .string()
-        .required('*Field is required!')
-        .email('* Email is invalid!'),
+        .required('*Field is required!'),
 });
 
 const useStyles = makeStyles((theme) => ({
@@ -77,10 +75,9 @@ function SignUp(props) {
                 </div>
                 <Formik
                     initialValues={{
-                        taiKhoan: '',
-                        matKhau: '',
-                        hoTen: '',
-                        soDt: '',
+                        username: '',
+                        password: '',
+                        phone_no: '',
                         email: '',
                     }}
                     onSubmit={handleOnSubmit}
@@ -95,31 +92,12 @@ function SignUp(props) {
                                 variant='filled'
                                 size='small'
                                 style={{ backGroundColor: 'white' }}
-                                label='Name'
-                                name='hoTen'
-                                onChange={formikProps.handleChange}
-                                onBlur={formikProps.handleBlur}
-                            />
-                            <ErrorMessage name='hoTen'>
-                                {(msg) => (
-                                    <div
-                                        className='m-0'
-                                        style={{ color: 'red' }}
-                                    >
-                                        {msg}
-                                    </div>
-                                )}
-                            </ErrorMessage>
-                            <Input
-                                variant='filled'
-                                size='small'
-                                style={{ backGroundColor: 'white' }}
                                 label='Phone number'
-                                name='soDt'
+                                name='phone_no'
                                 onChange={formikProps.handleChange}
                                 onBlur={formikProps.handleBlur}
                             />
-                            <ErrorMessage name='soDt'>
+                            <ErrorMessage name='phone_no'>
                                 {(msg) => (
                                     <div
                                         className='m-0'
@@ -153,11 +131,11 @@ function SignUp(props) {
                                 size='small'
                                 style={{ backGroundColor: 'white' }}
                                 label='Username'
-                                name='taiKhoan'
+                                name='username'
                                 onChange={formikProps.handleChange}
                                 onBlur={formikProps.handleBlur}
                             />
-                            <ErrorMessage name='taiKhoan'>
+                            <ErrorMessage name='username'>
                                 {(msg) => (
                                     <div
                                         className='m-0'
@@ -172,11 +150,11 @@ function SignUp(props) {
                                 size='small'
                                 style={{ backGroundColor: 'white' }}
                                 label='Password'
-                                name='matKhau'
+                                name='password'
                                 onChange={formikProps.handleChange}
                                 onBlur={formikProps.handleBlur}
                             />
-                            <ErrorMessage name='matKhau'>
+                            <ErrorMessage name='password'>
                                 {(msg) => (
                                     <div
                                         className='m-0'
@@ -191,13 +169,13 @@ function SignUp(props) {
                                 className='btn btn-primary my-3'
                                 style={{ width: '100%' }}
                             >
-                                Sign Up
+                                Register
                             </button>
                         </form>
                     )}
                 </Formik>
                 <div>
-                    <span>Already got an account? </span>
+                    <span>Already have an account? </span>
                     <NavLink
                         to={{
                             pathname: '/login',
@@ -205,7 +183,7 @@ function SignUp(props) {
                             prePage: props.location.prePage,
                         }}
                     >
-                        Login now.
+                        Login Now.
                     </NavLink>
                 </div>
             </div>

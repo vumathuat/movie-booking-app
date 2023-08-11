@@ -6,12 +6,11 @@ export const login = (dataLogin) => {
     return (dispatch) => {
         Axios({
             method: 'POST',
-            url: 'https://movie0706.cybersoft.edu.vn/api/QuanLyNguoiDung/DangNhap',
+            url: 'http://localhost:5000/login',
             data: dataLogin.user,
         })
             .then((result) => {
-                if (result.data.maLoaiNguoiDung === 'KhachHang') {
-                    localStorage.setItem('User', JSON.stringify(result.data));
+                localStorage.setItem('User', JSON.stringify(result.data));
                     if (dataLogin.preRequire) {
                         dataLogin.history.replace({
                             pathname: dataLogin.preRequire,
@@ -23,32 +22,25 @@ export const login = (dataLogin) => {
                     dispatch({
                         type: LOGIN,
                     });
-                } else {
-                    alert(
-                        'Đăng nhập thất bại!\nKhông thể dùng tài khoản Admin để đăng nhập.'
-                    );
-                }
             })
             .catch((err) => {
-                alert(err.response.data);
+                alert("Wrong username or password");
             });
     };
 };
 
 export const signUpAPI = (payload) => {
-    payload.user.maLoaiNguoiDung = 'KhachHang';
-    payload.user.maNhom = 'GP01';
     return (dispatch) => {
         Axios({
             method: 'POST',
-            url: 'https://movie0706.cybersoft.edu.vn/api/QuanLyNguoiDung/DangKy',
+            url: 'http://localhost:5000/register',
             data: payload.user,
         })
             .then((result) => {
                 Swal.fire({
                     icon: 'success',
-                    title: 'Đăng ký thành công!',
-                    text: 'Đăng nhập ngay',
+                    title: 'Register successfully!',
+                    text: 'Log in now',
                     width: '400px',
                     padding: '0 0 20px 0',
                 }).then(() => {
@@ -63,7 +55,7 @@ export const signUpAPI = (payload) => {
                 });
             })
             .catch((err) => {
-                alert(err.response.data);
+                alert("Your username have been taken");
             });
     };
 };

@@ -5,7 +5,7 @@ export const getListMovieAPI = () => {
     return (dispatch) => {
         Axios({
             method: 'GET',
-            url: 'https://movie0706.cybersoft.edu.vn/api/QuanLyPhim/LayDanhSachPhim?maNhom=GP10',
+            url: 'http://localhost:5000/films',
             headers: { 'Content-Type': 'application/json' },
         })
             .then((result) => {
@@ -24,7 +24,7 @@ export const getDetailMovie = (id) => {
     return (dispatch) => {
         Axios({
             method: 'GET',
-            url: `https://movie0706.cybersoft.edu.vn/api/QuanLyPhim/LayThongTinPhim?MaPhim=${id}`,
+            url: `http://localhost:5000/films?id=${id}`,
         })
             .then((result) => {
                 dispatch({

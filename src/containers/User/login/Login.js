@@ -11,8 +11,8 @@ import webLogo from '../../../assets/img/web-logo.png';
 import * as yup from 'yup';
 
 const loginUserSchema = yup.object().shape({
-    taiKhoan: yup.string().required('* Field is required!'),
-    matKhau: yup.string().required('* Field is required!'),
+    username: yup.string().required('* Field is required!'),
+    password: yup.string().required('* Field is required!'),
 });
 
 const useStyles = makeStyles((theme) => ({
@@ -65,8 +65,8 @@ function Login(props) {
                 </div>
                 <Formik
                     initialValues={{
-                        taiKhoan: '',
-                        matKhau: '',
+                        username: '',
+                        password: '',
                     }}
                     onSubmit={handleOnSubmit}
                     validationSchema={loginUserSchema}
@@ -81,11 +81,11 @@ function Login(props) {
                                 size='small'
                                 style={{ backGroundColor: 'white' }}
                                 label='Username'
-                                name='taiKhoan'
+                                name='username'
                                 onChange={formikProps.handleChange}
                                 onBlur={formikProps.handleBlur}
                             />
-                            <ErrorMessage name='taiKhoan'>
+                            <ErrorMessage name='username'>
                                 {(msg) => (
                                     <div
                                         className='m-0'
@@ -100,11 +100,11 @@ function Login(props) {
                                 size='small'
                                 style={{ backGroundColor: 'white' }}
                                 label='Password'
-                                name='matKhau'
+                                name='password'
                                 onChange={formikProps.handleChange}
                                 onBlur={formikProps.handleBlur}
                             />
-                            <ErrorMessage name='matKhau'>
+                            <ErrorMessage name='password'>
                                 {(msg) => (
                                     <div
                                         className='m-0'
