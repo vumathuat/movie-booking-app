@@ -372,9 +372,9 @@ describe("Test /booking", () => {
         const user = { "username": "test1234", "password": "test1234" };
         const login = await request(app).post("/login").send(user);
         const cookie = login.headers['set-cookie'];
-        const reservation = { "screening_id": "02", "seat_id": "1" };
+        const reservation = { "screening_id": "02", "seat_id": ["1"] };
         const screening_id = { "screening_id": "01" };
-        const update_timer = await request(app).get("/seatLayout?all_seat=1").send(screening_id).set("Cookie", cookie);
+        const update_timer = await request(app).get("/seatLayout?all=1&scr_id=1").set("Cookie", cookie);
         const res = await request(app).post("/booking").send(reservation).set("Cookie", cookie);
         const searchSRS_query = 'SELECT * FROM Seat_Reservation WHERE screening_id = "02" AND seat_id = "1"';
         const del_reverse_query = 'DELETE FROM Ticket_transac WHERE transaction_id = (SELECT transaction_id FROM Seat_Reservation WHERE screening_id = "02" AND seat_id = "1"); DELETE FROM Seat_Reservation WHERE screening_id = "02" AND seat_id = "1";';
@@ -422,8 +422,7 @@ describe("Test /seatLayout", () => {
         const user = { "username": "test1234", "password": "test1234" };
         const login = await request(app).post("/login").send(user);
         const cookie = login.headers['set-cookie'];
-        const screening_id = { "screening_id": "01" };
-        const res = await request(app).get("/seatLayout?all_seat=1").send(screening_id).set("Cookie", cookie);
+        const res = await request(app).get("/seatLayout?all=1&scr_id=1").set("Cookie", cookie);
         expect(res.statusCode).toBe(200);
     });
     
@@ -431,17 +430,16 @@ describe("Test /seatLayout", () => {
         const user = { "username": "test1234", "password": "test1234" };
         const login = await request(app).post("/login").send(user);
         const cookie = login.headers['set-cookie'];
-        const screening_id = { "screening_id": "01" };
-        const res = await request(app).get("/seatLayout?all_seat=0").send(screening_id).set("Cookie", cookie);
+        const res = await request(app).get("/seatLayout?all=0&scr_id=1").set("Cookie", cookie);
         expect(res.statusCode).toBe(200);
     });
     
-    test("Fail to get seat layout without all_seat parameter", async () => {
+    test("Fail to get seat layout without parameters", async () => {
         const user = { "username": "test1234", "password": "test1234" };
         const login = await request(app).post("/login").send(user);
         const cookie = login.headers['set-cookie'];
-        const screening_id = { "screening_id": "01" };
-        const res = await request(app).get("/seatLayout?").send(screening_id).set("Cookie", cookie);
+        const res = await request(app).get("/seatLayout?").set("Cookie", cookie);
         expect(res.statusCode).toBe(400);
     });
 });
+
